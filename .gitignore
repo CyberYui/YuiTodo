@@ -1,3 +1,6 @@
+# Dependencies
+node_modules/
+
 # Gradle files
 .gradle/
 build/
@@ -7,6 +10,7 @@ local.properties
 
 # Log/OS Files
 *.log
+.DS_Store
 
 # Android Studio generated files and folders
 captures/
@@ -32,3 +36,22 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
+# Expo
+.expo/
+.expo-shared/
+web-build/
+
+# Metro
+metro-health-checks.json
+
+# Seren
+.serena/
+
+# OS
+Thumbs.db
+
+# Temp
+*.tmp
+*.swp
+*~
