@@ -24,13 +24,6 @@ export const FONT_LIST = [
     category: 'rounded',
   },
   {
-    id: 'logo',
-    name: 'LOGO圆体',
-    file: require('../../assets/fonts/LOGO圆体.ttf'),
-    preview: '简约大气风格',
-    category: 'rounded',
-  },
-  {
     id: 'mengshen',
     name: '萌神手写',
     file: require('../../assets/fonts/萌神手写体.ttf'),
@@ -57,13 +50,6 @@ export const FONT_LIST = [
     file: require('../../assets/fonts/MapleMono-Regular.ttf'),
     preview: 'code await fetch()',
     category: 'mono',
-  },
-  {
-    id: 'pixel',
-    name: '像素拼音',
-    file: require('../../assets/fonts/ark-pixel-10px-monospaced-zh_cn.ttf'),
-    preview: '复古像素拼音风',
-    category: 'pixel',
   },
   {
     id: 'zcool-kuaile',
@@ -96,7 +82,6 @@ export const FONT_CATEGORIES = [
   { id: 'kai', name: '楷体' },
   { id: 'serif', name: '衬线' },
   { id: 'mono', name: '等宽' },
-  { id: 'pixel', name: '像素' },
   { id: 'system', name: '系统' },
 ];
 
