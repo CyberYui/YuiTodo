@@ -9,16 +9,19 @@ import { deleteTask } from '../database/TaskTable';
 import { deleteCompletionsByTask } from '../database/CompletionTable';
 import { deleteStepsByTask } from '../database/TaskStepTable';
 import ThemePicker from '../components/ThemePicker';
+import ThemeStylePicker from '../components/ThemeStylePicker';
 import GroupManagementModal from '../components/GroupManagementModal';
 import ThemedText from '../components/ThemedText';
 import { useBackground } from '../context/BackgroundContext';
 import { useReminder } from '../context/ReminderContext';
 
 export default function SettingsScreen({ navigation }) {
-  const { theme, themeMode, isDark } = useTheme();
+  const { theme, themeMode, isDark, themeStyle, availableStyles, taskBgMode, taskBgColor, setTaskBgMode } = useTheme();
+  const currentStyleName = availableStyles.find(s => s.id === themeStyle)?.name || 'Apple';
   const { currentFont } = useFont();
   const { tasks, loadTasks, groups, addGroup, editGroup, removeGroup, loadGroups, resetDemoTasks } = useTasks();
   const [themePickerVisible, setThemePickerVisible] = useState(false);
+  const [stylePickerVisible, setStylePickerVisible] = useState(false);
   const [groupModalVisible, setGroupModalVisible] = useState(false);
   const { hasBackground } = useBackground();
   const { enabled: reminderEnabled, times: reminderTimes } = useReminder();
@@ -82,6 +85,28 @@ export default function SettingsScreen({ navigation }) {
         </View>
         <View style={[styles.themeIndicator, { backgroundColor: isDark ? '#1F2937' : '#FFFFFF', borderColor: theme.separator }]} />
       </View>
+      <TouchableOpacity
+        style={[styles.settingItem, { backgroundColor: theme.cardBackground }]}
+        onPress={() => setStylePickerVisible(true)}
+      >
+        <View style={styles.settingLeft}>
+          <ThemedText style={[styles.settingLabel, { color: theme.textPrimary }]}>主题风格</ThemedText>
+          <ThemedText style={[styles.settingValue, { color: theme.textSecondary }]}>{currentStyleName}</ThemedText>
+        </View>
+        <Text style={[styles.settingArrow, { color: theme.textTertiary }]}>›</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.settingItem, { backgroundColor: theme.cardBackground }]}
+        onPress={() => setTaskBgMode(taskBgMode === 'follow' ? 'uniform' : 'follow')}
+      >
+        <View style={styles.settingLeft}>
+          <ThemedText style={[styles.settingLabel, { color: theme.textPrimary }]}>任务背景</ThemedText>
+          <ThemedText style={[styles.settingValue, { color: theme.textSecondary }]}>
+            {taskBgMode === 'follow' ? '跟随任务主题色' : '全局统一色'}
+          </ThemedText>
+        </View>
+        <View style={[styles.bgPreview, { backgroundColor: taskBgMode === 'follow' ? theme.primary + '20' : taskBgColor + '20' }]} />
+      </TouchableOpacity>
       <TouchableOpacity
         style={[styles.settingItem, { backgroundColor: theme.cardBackground }]}
         onPress={() => navigation.navigate('BackgroundSettings')}
@@ -183,6 +208,7 @@ export default function SettingsScreen({ navigation }) {
       </View>
       <View style={{ height: 40 }} />
       <ThemePicker visible={themePickerVisible} onClose={() => setThemePickerVisible(false)} />
+      <ThemeStylePicker visible={stylePickerVisible} onClose={() => setStylePickerVisible(false)} />
       <GroupManagementModal
         visible={groupModalVisible}
         groups={groups}
@@ -208,5 +234,6 @@ function createStyles(theme) {
     fontPreviewLabel: { fontSize: 11, fontWeight: '600', marginBottom: 8, textTransform: 'uppercase' },
     fontPreviewText: { fontSize: 18, marginBottom: 6 },
     fontPreviewSub: { fontSize: 14, marginBottom: 3 },
+    bgPreview: { width: 24, height: 24, borderRadius: 6, borderWidth: 1, borderColor: '#E5E7EB' },
   });
 }
