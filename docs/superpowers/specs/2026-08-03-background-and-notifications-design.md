@@ -27,6 +27,7 @@
 #### 新增依赖
 - `expo-image-picker` — 从相册选择图片
 - `expo-file-system` — 复制图片到应用目录
+- `expo-image-manipulator` — 压缩/缩放图片
 
 #### 新增文件
 - `src/context/BackgroundContext.js` — 背景状态管理
@@ -60,6 +61,25 @@ const {
   setOpacity,      // (value: number) => void — 设置透明度
   removeBackground // () => void — 移除背景
 } = useBackground();
+```
+
+#### 图片压缩策略
+选图后，使用 `expo-image-manipulator` 进行无损压缩：
+- **缩放**：长边限制到 1080px（适配手机屏幕，无需更高分辨率）
+- **压缩**：JPEG 质量 85%（视觉无损，体积减少 50-70%）
+- **存储**：保存为 JPEG 格式到应用目录
+
+```js
+import * as ImageManipulator from 'expo-image-manipulator';
+
+async function compressImage(uri) {
+  const result = await ImageManipulator.manipulateAsync(
+    uri,
+    [{ resize: { width: 1080 } }],
+    { compress: 0.85, format: ImageManipulator.SaveFormat.JPEG }
+  );
+  return result.uri;
+}
 ```
 
 #### 数据持久化（app_setting 表）
@@ -220,4 +240,4 @@ GestureHandlerRootView
 
 1. **expo-notifications 在 Expo Go 中的限制**：开发期间可测试，生产构建完全支持
 2. **后台通知可靠性**：Android 厂商省电策略可能影响到达率，属系统层面问题
-3. **图片文件大小**：选择后自动复制到应用目录，不压缩（用户自行选择合适尺寸的图片）
+3. **图片压缩**：选图后自动缩放至 1080px 长边 + JPEG 85% 质量压缩，体积减少 50-70%，视觉无损
