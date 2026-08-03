@@ -10,7 +10,7 @@ import ThemedText from '../components/ThemedText';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function BackgroundSettingsScreen({ navigation }) {
-  const { theme } = useTheme();
+  const { theme, styleConfig } = useTheme();
   const { lightImageUri, darkImageUri, lightOpacity, darkOpacity, hasBackground, selectImage, setOpacity, removeBackground, permissionStatus, requestPermission } = useBackground();
   const { currentFont } = useFont();
   const [activeMode, setActiveMode] = useState('light');
@@ -54,16 +54,36 @@ export default function BackgroundSettingsScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      {/* 预览 */}
+      {/* 预览（等比显示任务列表效果） */}
       <View style={styles.previewSection}>
         {hasBackground ? (
           <ImageBackground source={{ uri: currentImage }} style={styles.previewImage} imageStyle={[styles.previewImageStyle, { opacity: currentOpacity }]}>
             <View style={styles.previewOverlay}>
-              <View style={styles.previewCard}>
-                <ThemedText style={[styles.previewCardTitle, { fontFamily }]}>今天</ThemedText>
-                <ThemedText style={[styles.previewCardItem, { fontFamily }]}>☑ 写周报</ThemedText>
-                <ThemedText style={[styles.previewCardItem, { fontFamily }]}>☐ 运动 30 分钟</ThemedText>
-                <ThemedText style={[styles.previewCardItem, { fontFamily }]}>☐ 阅读 1 小时</ThemedText>
+              <View style={styles.previewTaskContainer}>
+                <View style={[styles.previewTaskCard, { backgroundColor: theme.cardBackground, borderRadius: styleConfig?.cardRadius || 10 }]}>
+                  <View style={[styles.previewLeftBar, { backgroundColor: theme.primary }]} />
+                  <View style={styles.previewTaskContent}>
+                    <ThemedText style={[styles.previewTaskTitle, { color: theme.textPrimary, fontFamily }]}>完成项目报告</ThemedText>
+                    <ThemedText style={[styles.previewTaskMeta, { color: theme.textTertiary, fontFamily }]}>今天 · 已完成 3/5</ThemedText>
+                  </View>
+                  <Text style={[styles.previewStar, { color: '#F59E0B' }]}>★</Text>
+                </View>
+                <View style={[styles.previewTaskCard, { backgroundColor: theme.cardBackground, borderRadius: styleConfig?.cardRadius || 10 }]}>
+                  <View style={[styles.previewLeftBar, { backgroundColor: '#EF4444' }]} />
+                  <View style={styles.previewTaskContent}>
+                    <ThemedText style={[styles.previewTaskTitle, { color: theme.textPrimary, fontFamily }]}>运动 30 分钟</ThemedText>
+                    <ThemedText style={[styles.previewTaskMeta, { color: theme.textTertiary, fontFamily }]}>今天 · 循环任务</ThemedText>
+                  </View>
+                  <Text style={[styles.previewStar, { color: theme.textTertiary }]}>☆</Text>
+                </View>
+                <View style={[styles.previewTaskCard, { backgroundColor: theme.cardBackground, borderRadius: styleConfig?.cardRadius || 10 }]}>
+                  <View style={[styles.previewLeftBar, { backgroundColor: '#22C55E' }]} />
+                  <View style={styles.previewTaskContent}>
+                    <ThemedText style={[styles.previewTaskTitle, { color: theme.textPrimary, fontFamily }]}>阅读 1 小时</ThemedText>
+                    <ThemedText style={[styles.previewTaskMeta, { color: theme.textTertiary, fontFamily }]}>明天</ThemedText>
+                  </View>
+                  <Text style={[styles.previewStar, { color: theme.textTertiary }]}>☆</Text>
+                </View>
               </View>
             </View>
           </ImageBackground>
@@ -116,13 +136,18 @@ function createStyles(theme) {
     tab: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 6 },
     tabActive: { backgroundColor: theme.cardBackground },
     tabText: { fontSize: 14, fontWeight: '500' },
-    previewSection: { height: 300, margin: 16, borderRadius: 12, overflow: 'hidden' },
+    previewSection: { height: 320, margin: 16, borderRadius: 12, overflow: 'hidden' },
     previewImage: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     previewImageStyle: { borderRadius: 0 },
     previewOverlay: { flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%' },
     previewCard: { backgroundColor: 'rgba(255,255,255,0.95)', borderRadius: 12, padding: 16, width: SCREEN_WIDTH - 80 },
-    previewCardTitle: { fontSize: 16, fontWeight: '700', marginBottom: 8 },
-    previewCardItem: { fontSize: 14, marginBottom: 4 },
+    previewTaskContainer: { width: '100%', paddingHorizontal: 16, paddingVertical: 12 },
+    previewTaskCard: { flexDirection: 'row', alignItems: 'center', marginBottom: 8, overflow: 'hidden' },
+    previewLeftBar: { width: 4, alignSelf: 'stretch', minHeight: 56 },
+    previewTaskContent: { flex: 1, paddingVertical: 10, paddingHorizontal: 12 },
+    previewTaskTitle: { fontSize: 15, fontWeight: '500', marginBottom: 2 },
+    previewTaskMeta: { fontSize: 12 },
+    previewStar: { fontSize: 18, paddingRight: 10 },
     emptyPreview: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.cardBackground },
     emptyText: { fontSize: 16, fontWeight: '600', marginBottom: 4 },
     emptySub: { fontSize: 13 },
