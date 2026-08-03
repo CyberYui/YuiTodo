@@ -14,7 +14,7 @@ export function ThemeProvider({ children }) {
   const [themeMode, setThemeModeState] = useState(ThemeMode.AUTO);
   const [darkStartTime, setDarkStartTime] = useState('21:00');
   const [lightStartTime, setLightStartTime] = useState('07:00');
-  const [themeStyle, setThemeStyleState] = useState('sorted');
+  const [themeStyle, setThemeStyleState] = useState('apple');
   const [taskBgEnabled, setTaskBgEnabledState] = useState(false);
   const [taskBgColor, setTaskBgColorState] = useState('#3B82F6');
 
