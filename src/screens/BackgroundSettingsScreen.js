@@ -1,7 +1,7 @@
 // 背景设置页面
 // 职责：选图、预览、透明度调节
 
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ImageBackground, Dimensions, Alert } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { useTheme } from '../context/ThemeContext';
@@ -12,8 +12,12 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function BackgroundSettingsScreen({ navigation }) {
   const { theme } = useTheme();
-  const { imageUri, opacity, hasBackground, selectImage, setOpacity, removeBackground } = useBackground();
+  const { lightImageUri, darkImageUri, lightOpacity, darkOpacity, hasBackground, selectImage, setOpacity, removeBackground } = useBackground();
+  const [activeMode, setActiveMode] = useState('light');
   const styles = createStyles(theme);
+
+  const currentImage = activeMode === 'light' ? lightImageUri : darkImageUri;
+  const currentOpacity = activeMode === 'light' ? lightOpacity : darkOpacity;
 
   const handleRemove = () => {
     Alert.alert('移除背景', '确定要移除当前背景图片吗？', [
@@ -24,12 +28,26 @@ export default function BackgroundSettingsScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
+      <View style={styles.tabBar}>
+        <TouchableOpacity
+          style={[styles.tab, activeMode === 'light' && styles.tabActive, { borderColor: theme.separator }]}
+          onPress={() => setActiveMode('light')}
+        >
+          <ThemedText style={[styles.tabText, activeMode === 'light' && { color: theme.primary }]}>☀️ 浅色</ThemedText>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeMode === 'dark' && styles.tabActive, { borderColor: theme.separator }]}
+          onPress={() => setActiveMode('dark')}
+        >
+          <ThemedText style={[styles.tabText, activeMode === 'dark' && { color: theme.primary }]}>🌙 深色</ThemedText>
+        </TouchableOpacity>
+      </View>
       <View style={styles.previewSection}>
         {hasBackground ? (
           <ImageBackground
-            source={{ uri: imageUri }}
+            source={{ uri: currentImage }}
             style={styles.previewImage}
-            imageStyle={[styles.previewImageStyle, { opacity }]}
+            imageStyle={[styles.previewImageStyle, { opacity: currentOpacity }]}
           >
             <View style={styles.previewOverlay}>
               <View style={styles.previewCard}>
@@ -49,7 +67,7 @@ export default function BackgroundSettingsScreen({ navigation }) {
       </View>
 
       <View style={styles.buttonSection}>
-        <TouchableOpacity style={[styles.button, { backgroundColor: theme.primary }]} onPress={selectImage}>
+        <TouchableOpacity style={[styles.button, { backgroundColor: theme.primary }]} onPress={() => selectImage(activeMode)}>
           <ThemedText style={styles.buttonText}>
             {hasBackground ? '更换图片' : '选择图片'}
           </ThemedText>
@@ -66,7 +84,7 @@ export default function BackgroundSettingsScreen({ navigation }) {
           <View style={styles.opacityHeader}>
             <ThemedText style={[styles.opacityLabel, { color: theme.textPrimary }]}>透明度</ThemedText>
             <ThemedText style={[styles.opacityValue, { color: theme.textSecondary }]}>
-              {Math.round(opacity * 100)}%
+              {Math.round(currentOpacity * 100)}%
             </ThemedText>
           </View>
           <Slider
@@ -74,8 +92,8 @@ export default function BackgroundSettingsScreen({ navigation }) {
             minimumValue={0}
             maximumValue={1}
             step={0.05}
-            value={opacity}
-            onValueChange={setOpacity}
+            value={currentOpacity}
+            onValueChange={(v) => setOpacity(v, activeMode)}
             minimumTrackTintColor={theme.primary}
             maximumTrackTintColor={theme.separator}
             thumbTintColor={theme.primary}
@@ -93,6 +111,10 @@ export default function BackgroundSettingsScreen({ navigation }) {
 function createStyles(theme) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: theme.background },
+    tabBar: { flexDirection: 'row', marginHorizontal: 16, marginTop: 16, marginBottom: 8, backgroundColor: theme.separator + '40', borderRadius: 8, padding: 3 },
+    tab: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 6 },
+    tabActive: { backgroundColor: theme.cardBackground },
+    tabText: { fontSize: 14, fontWeight: '500' },
     previewSection: { height: 280, margin: 16, borderRadius: 12, overflow: 'hidden' },
     previewImage: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     previewImageStyle: { borderRadius: 0 },
