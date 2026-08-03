@@ -67,83 +67,97 @@ export function BackgroundProvider({ children }) {
 
   // 检查当前相册权限状态
   async function checkPermission() {
-    const { status } = await ImagePicker.getMediaLibraryPermissionsAsync();
-    setPermissionStatus(status);
+    try {
+      const { status } = await ImagePicker.getMediaLibraryPermissionsAsync();
+      setPermissionStatus(status);
+    } catch (e) {
+      console.error('检查权限失败:', e);
+    }
   }
 
   // 请求相册权限
   const requestPermission = useCallback(async () => {
-    const { status, canAskAgain } = await ImagePicker.getMediaLibraryPermissionsAsync();
+    try {
+      const { status, canAskAgain } = await ImagePicker.getMediaLibraryPermissionsAsync();
 
-    if (status === 'granted') {
-      setPermissionStatus('granted');
-      return true;
-    }
+      if (status === 'granted') {
+        setPermissionStatus('granted');
+        return true;
+      }
 
-    if (!canAskAgain) {
-      // 被永久拒绝
-      Alert.alert(
-        '需要相册权限',
-        '相册权限已被永久拒绝，请在系统设置中手动开启',
-        [
-          { text: '取消', style: 'cancel' },
-          { text: '去设置', onPress: () => Linking.openSettings() },
-        ]
-      );
-      setPermissionStatus('denied');
+      if (!canAskAgain) {
+        Alert.alert(
+          '需要相册权限',
+          '相册权限已被永久拒绝，请在系统设置中手动开启',
+          [
+            { text: '取消', style: 'cancel' },
+            { text: '去设置', onPress: () => Linking.openSettings() },
+          ]
+        );
+        setPermissionStatus('denied');
+        return false;
+      }
+
+      // 弹出权限请求
+      const result = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      setPermissionStatus(result.status);
+      return result.status === 'granted';
+    } catch (e) {
+      console.error('请求权限失败:', e);
       return false;
     }
-
-    // 弹出权限请求
-    const result = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    setPermissionStatus(result.status);
-    return result.status === 'granted';
   }, []);
 
   const selectImage = useCallback(async (mode = 'light') => {
-    // 先检查权限
-    const { status } = await ImagePicker.getMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      const granted = await requestPermission();
-      if (!granted) return;
-    }
+    try {
+      // 实时检查权限
+      const { status } = await ImagePicker.getMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        const granted = await requestPermission();
+        if (!granted) return;
+      }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: false,
-      quality: 1,
-    });
+      // 启动图片选择器
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: false,
+        quality: 1,
+      });
 
-    if (result.canceled || !result.assets || result.assets.length === 0) return;
+      if (result.canceled || !result.assets || result.assets.length === 0) return;
 
-    const originalUri = result.assets[0].uri;
+      const originalUri = result.assets[0].uri;
 
-    const compressed = await ImageManipulator.manipulateAsync(
-      originalUri,
-      [{ resize: { width: 1080 } }],
-      { compress: 0.85, format: ImageManipulator.SaveFormat.JPEG }
-    );
+      const compressed = await ImageManipulator.manipulateAsync(
+        originalUri,
+        [{ resize: { width: 1080 } }],
+        { compress: 0.85, format: ImageManipulator.SaveFormat.JPEG }
+      );
 
-    const dirInfo = await FileSystem.getInfoAsync(STORAGE_DIR);
-    if (!dirInfo.exists) {
-      await FileSystem.makeDirectoryAsync(STORAGE_DIR, { intermediates: true });
-    }
+      const dirInfo = await FileSystem.getInfoAsync(STORAGE_DIR);
+      if (!dirInfo.exists) {
+        await FileSystem.makeDirectoryAsync(STORAGE_DIR, { intermediates: true });
+      }
 
-    const fileName = `background_${Date.now()}.jpg`;
-    const destUri = `${STORAGE_DIR}${fileName}`;
-    await FileSystem.copyAsync({ from: compressed.uri, to: destUri });
+      const fileName = `background_${Date.now()}.jpg`;
+      const destUri = `${STORAGE_DIR}${fileName}`;
+      await FileSystem.copyAsync({ from: compressed.uri, to: destUri });
 
-    const targetUri = mode === 'light' ? lightImageUri : darkImageUri;
-    if (targetUri && targetUri.startsWith(STORAGE_DIR)) {
-      try { await FileSystem.deleteAsync(targetUri); } catch (e) {}
-    }
+      const targetUri = mode === 'light' ? lightImageUri : darkImageUri;
+      if (targetUri && targetUri.startsWith(STORAGE_DIR)) {
+        try { await FileSystem.deleteAsync(targetUri); } catch (e) {}
+      }
 
-    if (mode === 'light') {
-      setLightImageUri(destUri);
-      await saveSetting('bg_light_image_uri', destUri);
-    } else {
-      setDarkImageUri(destUri);
-      await saveSetting('bg_dark_image_uri', destUri);
+      if (mode === 'light') {
+        setLightImageUri(destUri);
+        await saveSetting('bg_light_image_uri', destUri);
+      } else {
+        setDarkImageUri(destUri);
+        await saveSetting('bg_dark_image_uri', destUri);
+      }
+    } catch (e) {
+      console.error('选择图片失败:', e);
+      Alert.alert('选择失败', '无法打开相册，请检查权限设置');
     }
   }, [lightImageUri, darkImageUri, requestPermission]);
 

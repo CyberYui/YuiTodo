@@ -2,7 +2,7 @@
 // 职责：展示任务信息 + 左右滑动交互 + 步骤进度 + 颜色自定义
 
 import React, { useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { useTheme } from '../context/ThemeContext';
 import { TaskStatus, RecurrenceLabels, TASK_COLORS } from '../utils/constants';
@@ -10,6 +10,7 @@ import { formatDateFriendly, isDateToday, isExpired } from '../utils/dateHelpers
 import ThemedText from './ThemedText';
 
 const SWIPE_THRESHOLD = 80;
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
 export default function TaskItem({
   task,
@@ -19,7 +20,7 @@ export default function TaskItem({
   onToggleStep,
   onToggleStar,
 }) {
-  const { theme, styleConfig, taskBgColor, taskBgEnabled, isDark } = useTheme();
+  const { theme, styleConfig, taskBgEnabled, taskBgColor } = useTheme();
   const swipeableRef = useRef(null);
   const styles = createStyles(theme);
 
@@ -39,14 +40,8 @@ export default function TaskItem({
   const bgColor = taskTheme.bg;
 
   const leftBarWidth = styleConfig?.leftBarWidth || 0;
-
-  // 任务卡片背景色
-  function getCardBackground() {
-    if (taskBgEnabled && taskBgColor) {
-      return hexToRgba(taskBgColor, 0.08);
-    }
-    return theme.cardBackground;
-  }
+  // 开启背景色时不显示左侧细条（避免双色块）
+  const showLeftBar = leftBarWidth > 0 && !taskBgEnabled;
 
   function hexToRgba(hex, alpha) {
     if (!hex || typeof hex !== 'string' || !hex.startsWith('#')) {
@@ -58,14 +53,23 @@ export default function TaskItem({
     return `rgba(${r},${g},${b},${alpha})`;
   }
 
-  const renderLeftActions = () => (
-    <View style={[styles.leftAction, { backgroundColor: theme.swipeDeleteBg, borderRadius: styleConfig?.cardRadius || 10 }]}>
-      <Text style={[styles.actionIcon, { color: theme.danger }]}>🗑</Text>
-      <Text style={[styles.actionText, { color: theme.danger }]}>删除</Text>
+  function getCardBackground() {
+    if (taskBgEnabled && taskBgColor) {
+      return hexToRgba(taskBgColor, 0.08);
+    }
+    return theme.cardBackground;
+  }
+
+  const renderLeftActions = (progress) => (
+    <View style={[styles.actionContainer, { backgroundColor: theme.swipeDeleteBg }]}>
+      <View style={styles.actionInner}>
+        <Text style={[styles.actionIcon, { color: theme.danger }]}>🗑</Text>
+        <Text style={[styles.actionText, { color: theme.danger }]}>删除</Text>
+      </View>
     </View>
   );
 
-  const renderRightActions = () => {
+  const renderRightActions = (progress) => {
     let actionText = '完成';
     let actionIcon = '✓';
     if (hasSteps && !allStepsCompleted) {
@@ -73,9 +77,11 @@ export default function TaskItem({
       actionIcon = '▶';
     }
     return (
-      <View style={[styles.rightAction, { backgroundColor: theme.swipeCompleteBg, borderRadius: styleConfig?.cardRadius || 10 }]}>
-        <Text style={[styles.actionIcon, { color: theme.done }]}>{actionIcon}</Text>
-        <Text style={[styles.actionText, { color: theme.done }]}>{actionText}</Text>
+      <View style={[styles.actionContainer, { backgroundColor: theme.swipeCompleteBg }]}>
+        <View style={styles.actionInner}>
+          <Text style={[styles.actionIcon, { color: theme.done }]}>{actionIcon}</Text>
+          <Text style={[styles.actionText, { color: theme.done }]}>{actionText}</Text>
+        </View>
       </View>
     );
   };
@@ -139,8 +145,8 @@ export default function TaskItem({
         activeOpacity={0.8}
         delayLongPress={400}
       >
-        {/* 左侧彩色细条 */}
-        {leftBarWidth > 0 && (
+        {/* 左侧彩色细条（开启背景色时隐藏） */}
+        {showLeftBar && (
           <View style={[styles.leftBar, { backgroundColor: isDone ? theme.done : taskColor, width: leftBarWidth }]} />
         )}
 
@@ -277,9 +283,21 @@ function createStyles(theme) {
     starButton: { padding: 4 },
     starText: { fontSize: 20 },
     pausedText: { fontSize: 14 },
-    leftAction: { flex: 1, justifyContent: 'center', alignItems: 'flex-end', paddingRight: 20, marginVertical: 4, borderRadius: 10 },
-    rightAction: { flex: 1, justifyContent: 'center', alignItems: 'flex-start', paddingLeft: 20, marginVertical: 4, borderRadius: 10 },
-    actionIcon: { fontSize: 18, marginBottom: 2 },
+    // 滑动操作区域（绝对定位在内容层下方）
+    actionContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      marginVertical: 4,
+      borderRadius: 10,
+    },
+    actionInner: {
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 24,
+      gap: 4,
+    },
+    actionIcon: { fontSize: 22 },
     actionText: { fontSize: 13, fontWeight: '600' },
   });
 }
