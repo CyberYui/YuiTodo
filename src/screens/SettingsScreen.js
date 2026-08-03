@@ -11,6 +11,8 @@ import { deleteStepsByTask } from '../database/TaskStepTable';
 import ThemePicker from '../components/ThemePicker';
 import GroupManagementModal from '../components/GroupManagementModal';
 import ThemedText from '../components/ThemedText';
+import { useBackground } from '../context/BackgroundContext';
+import { useReminder } from '../context/ReminderContext';
 
 export default function SettingsScreen({ navigation }) {
   const { theme, themeMode, isDark } = useTheme();
@@ -18,6 +20,8 @@ export default function SettingsScreen({ navigation }) {
   const { tasks, loadTasks, groups, addGroup, editGroup, removeGroup, loadGroups, resetDemoTasks } = useTasks();
   const [themePickerVisible, setThemePickerVisible] = useState(false);
   const [groupModalVisible, setGroupModalVisible] = useState(false);
+  const { hasBackground } = useBackground();
+  const { enabled: reminderEnabled, times: reminderTimes } = useReminder();
   const styles = createStyles(theme);
 
   const handleClearAllTasks = () => {
@@ -78,6 +82,18 @@ export default function SettingsScreen({ navigation }) {
         </View>
         <View style={[styles.themeIndicator, { backgroundColor: isDark ? '#1F2937' : '#FFFFFF', borderColor: theme.separator }]} />
       </View>
+      <TouchableOpacity
+        style={[styles.settingItem, { backgroundColor: theme.cardBackground }]}
+        onPress={() => navigation.navigate('BackgroundSettings')}
+      >
+        <View style={styles.settingLeft}>
+          <ThemedText style={[styles.settingLabel, { color: theme.textPrimary }]}>背景图片</ThemedText>
+          <ThemedText style={[styles.settingValue, { color: theme.textSecondary }]}>
+            {hasBackground ? '已设置' : '未设置'}
+          </ThemedText>
+        </View>
+        <Text style={[styles.settingArrow, { color: theme.textTertiary }]}>›</Text>
+      </TouchableOpacity>
 
       {/* 字体选择 */}
       <Text style={[styles.sectionTitle, { color: theme.textTertiary }]}>字体</Text>
@@ -100,6 +116,20 @@ export default function SettingsScreen({ navigation }) {
           今天 · 已完成 3/5 · 循环任务
         </ThemedText>
       </View>
+
+      <Text style={[styles.sectionTitle, { color: theme.textTertiary }]}>提醒</Text>
+      <TouchableOpacity
+        style={[styles.settingItem, { backgroundColor: theme.cardBackground }]}
+        onPress={() => navigation.navigate('ReminderSettings')}
+      >
+        <View style={styles.settingLeft}>
+          <ThemedText style={[styles.settingLabel, { color: theme.textPrimary }]}>每日提醒</ThemedText>
+          <ThemedText style={[styles.settingValue, { color: theme.textSecondary }]}>
+            {reminderEnabled ? `已开启 · ${reminderTimes.length}个时间点` : '已关闭'}
+          </ThemedText>
+        </View>
+        <Text style={[styles.settingArrow, { color: theme.textTertiary }]}>›</Text>
+      </TouchableOpacity>
 
       {/* 任务分组管理 */}
       <Text style={[styles.sectionTitle, { color: theme.textTertiary }]}>任务分组</Text>
