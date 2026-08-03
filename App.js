@@ -13,6 +13,8 @@ import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 // 导入全局状态Provider
 import { ThemeProvider } from './src/context/ThemeContext';
 import { FontProvider } from './src/context/FontContext';
+import { BackgroundProvider } from './src/context/BackgroundContext';
+import { ReminderProvider } from './src/context/ReminderContext';
 import { TaskProvider } from './src/context/TaskContext';
 
 // 导入页面组件
@@ -20,6 +22,8 @@ import HomeScreen from './src/screens/HomeScreen';
 import StatisticsScreen from './src/screens/StatisticsScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import FontPickerScreen from './src/components/FontPicker';
+import BackgroundSettingsScreen from './src/screens/BackgroundSettingsScreen';
+import ReminderSettingsScreen from './src/screens/ReminderSettingsScreen';
 
 // 导入字体加载Hook
 import { useFontLoader } from './src/hooks/useFontLoader';
@@ -81,6 +85,16 @@ function AppContent() {
           component={FontPickerScreen}
           options={{ title: '选择字体' }}
         />
+        <Stack.Screen
+          name="BackgroundSettings"
+          component={BackgroundSettingsScreen}
+          options={{ title: '背景图片' }}
+        />
+        <Stack.Screen
+          name="ReminderSettings"
+          component={ReminderSettingsScreen}
+          options={{ title: '每日提醒' }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -96,10 +110,16 @@ export default function App() {
         <ThemeProvider>
           {/* 字体Provider：提供全局字体设置 */}
           <FontProvider>
-            {/* 任务数据Provider：提供任务列表和操作函数 */}
-            <TaskProvider>
-              <AppContent />
-            </TaskProvider>
+            {/* 背景图片Provider：管理背景图片状态 */}
+            <BackgroundProvider>
+              {/* 提醒Provider：管理每日提醒设置 */}
+              <ReminderProvider>
+                {/* 任务数据Provider：提供任务列表和操作函数 */}
+                <TaskProvider>
+                  <AppContent />
+                </TaskProvider>
+              </ReminderProvider>
+            </BackgroundProvider>
           </FontProvider>
         </ThemeProvider>
       </SafeAreaProvider>
