@@ -43,31 +43,12 @@ export default function HomeScreen({ navigation }) {
   const undoAnim = useRef(new Animated.Value(0)).current;
   const dragFromIndex = useRef(null);
 
-  // 拖拽排序处理
+  // 拖拽排序处理（长按拖拽）
   const handleDragStart = useCallback((taskId) => {
     startDrag(taskId);
     const idx = listData.findIndex(item => item.type === 'task' && item.task.id === taskId);
     dragFromIndex.current = idx;
   }, [listData, startDrag]);
-
-  const handleDragEnd = useCallback(async () => {
-    if (dragOverIndex.current != null && dragFromIndex.current != null && dragOverIndex.current !== dragFromIndex.current) {
-      // 执行重排序
-      const taskItems = listData.filter(item => item.type === 'task');
-      const newOrder = await reorderTasks(taskItems.map(i => i.task), dragFromIndex.current, dragOverIndex.current);
-      if (newOrder) {
-        // 触发任务重新加载
-        // 注意：实际应用中这里需要更新tasks状态
-      }
-    }
-    dragFromIndex.current = null;
-    dragOverIndex.current = null;
-    endDrag();
-  }, [listData, reorderTasks, endDrag]);
-
-  const [dragOverIdx, setDragOverIdx] = useState(null);
-  const dragOverIndex = useRef(null);
-  dragOverIndex.current = dragOverIdx;
 
   const imageUri = getCurrentImage(isDark);
   const opacity = getCurrentOpacity(isDark);

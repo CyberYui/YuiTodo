@@ -137,7 +137,7 @@ export default function TaskItem({ task, onPress, onSwipeComplete, onSwipeDelete
           backgroundColor: isChecked ? theme.done : 'transparent',
         },
       ]}>
-        {isChecked && <Icon name="check" size: size * 0.7, color: '#FFFFFF' />}
+        {isChecked && <Icon name="check" size={size * 0.7} color="#FFFFFF" />}
       </View>
     );
   }
