@@ -1,4 +1,4 @@
-// 主题风格选择器
+// 主题风格选择器（8种风格）
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView, Dimensions } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
@@ -29,6 +29,7 @@ export default function ThemeStylePicker({ visible, onClose }) {
           {availableStyles.map((style) => {
             const styleConfig = THEME_STYLES[style.id];
             const isSelected = themeStyle === style.id;
+            const lightColors = styleConfig.light;
             return (
               <TouchableOpacity
                 key={style.id}
@@ -39,10 +40,15 @@ export default function ThemeStylePicker({ visible, onClose }) {
                 ]}
                 onPress={() => handleSelect(style.id)}
               >
-                <View style={[styles.preview, { backgroundColor: styleConfig.light.background }]}>
-                  <View style={[styles.previewCard, { backgroundColor: styleConfig.light.cardBackground, borderRadius: styleConfig.cardRadius }]}>
-                    <View style={[styles.previewBar, { backgroundColor: styleConfig.light.primary }]} />
-                    <ThemedText style={[styles.previewText, { color: styleConfig.light.textPrimary }]}>示例任务</ThemedText>
+                <View style={[styles.preview, { backgroundColor: lightColors.background }]}>
+                  <View style={[styles.previewCard, { backgroundColor: lightColors.cardBackground, borderRadius: styleConfig.cardRadius }]}>
+                    {styleConfig.leftBarWidth > 0 && (
+                      <View style={[styles.previewBar, { backgroundColor: lightColors.primary, width: styleConfig.leftBarWidth }]} />
+                    )}
+                    <View style={{ flex: 1 }}>
+                      <ThemedText style={[styles.previewText, { color: lightColors.textPrimary }]}>示例任务</ThemedText>
+                      <ThemedText style={[styles.previewSub, { color: lightColors.textTertiary }]}>今天</ThemedText>
+                    </View>
                   </View>
                 </View>
                 <View style={styles.cardFooter}>
@@ -67,8 +73,9 @@ const styles = StyleSheet.create({
   card: { width: CARD_WIDTH, borderRadius: 12, borderWidth: 1, overflow: 'hidden' },
   preview: { height: 100, padding: 8 },
   previewCard: { flex: 1, padding: 6, flexDirection: 'row', alignItems: 'center', gap: 6 },
-  previewBar: { width: 3, height: '100%', borderRadius: 2 },
+  previewBar: { height: '100%', borderRadius: 2 },
   previewText: { fontSize: 11 },
+  previewSub: { fontSize: 9, marginTop: 2 },
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10 },
   cardName: { fontSize: 14, fontWeight: '600' },
 });

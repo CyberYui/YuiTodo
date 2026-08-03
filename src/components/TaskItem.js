@@ -1,31 +1,16 @@
 // 单个任务条目组件（完整版：步骤可交互 + 自定义颜色 + 月份归档支持）
 // 职责：展示任务信息 + 左右滑动交互 + 步骤进度 + 颜色自定义
-//
-// 交互规则：
-// - 左滑：删除任务 🗑
-// - 右滑：完成（如果有步骤则完成当前步骤，否则直接完成）
-// - 点击/长按：打开编辑弹窗
-// - 点击步骤行：切换步骤完成状态
 
 import React, { useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { useTheme } from '../context/ThemeContext';
 import { TaskStatus, RecurrenceLabels, TASK_COLORS } from '../utils/constants';
 import { formatDateFriendly, isDateToday, isExpired } from '../utils/dateHelpers';
 import ThemedText from './ThemedText';
 
-// 滑动阈值
 const SWIPE_THRESHOLD = 80;
 
-/**
- * 任务条目组件
- */
 export default function TaskItem({
   task,
   onPress,
@@ -34,9 +19,8 @@ export default function TaskItem({
   onToggleStep,
   onToggleStar,
 }) {
-  const { theme, styleConfig, isDark } = useTheme();
+  const { theme, styleConfig, taskBgColor, taskBgEnabled, isDark } = useTheme();
   const swipeableRef = useRef(null);
-
   const styles = createStyles(theme);
 
   const isDone = task.status === TaskStatus.DONE;
@@ -52,10 +36,27 @@ export default function TaskItem({
   const taskTheme = TASK_COLORS.find((c) => c.bar === task.color) || TASK_COLORS[0];
   const taskColor = taskTheme.bar;
   const labelColor = taskTheme.label;
-  const dateColor = taskTheme.date;
   const bgColor = taskTheme.bg;
 
   const leftBarWidth = styleConfig?.leftBarWidth || 0;
+
+  // 任务卡片背景色
+  function getCardBackground() {
+    if (taskBgEnabled && taskBgColor) {
+      return hexToRgba(taskBgColor, 0.08);
+    }
+    return theme.cardBackground;
+  }
+
+  function hexToRgba(hex, alpha) {
+    if (!hex || typeof hex !== 'string' || !hex.startsWith('#')) {
+      return `rgba(59,130,246,${alpha})`;
+    }
+    const r = parseInt(hex.slice(1, 3), 16) || 0;
+    const g = parseInt(hex.slice(3, 5), 16) || 0;
+    const b = parseInt(hex.slice(5, 7), 16) || 0;
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
 
   const renderLeftActions = () => (
     <View style={[styles.leftAction, { backgroundColor: theme.swipeDeleteBg, borderRadius: styleConfig?.cardRadius || 10 }]}>
@@ -127,7 +128,7 @@ export default function TaskItem({
         style={[
           styles.card,
           {
-            backgroundColor: theme.cardBackground,
+            backgroundColor: getCardBackground(),
             opacity: isDone ? 0.6 : 1,
             borderRadius: styleConfig?.cardRadius || 10,
             ...(styleConfig?.shadowStyle || {}),
@@ -138,7 +139,7 @@ export default function TaskItem({
         activeOpacity={0.8}
         delayLongPress={400}
       >
-        {/* 左侧彩色细条（颜色指示器，部分风格可能为 0） */}
+        {/* 左侧彩色细条 */}
         {leftBarWidth > 0 && (
           <View style={[styles.leftBar, { backgroundColor: isDone ? theme.done : taskColor, width: leftBarWidth }]} />
         )}
@@ -257,22 +258,13 @@ function createStyles(theme) {
       elevation: 2,
       overflow: 'hidden',
     },
-    leftBar: {
-      alignSelf: 'stretch',
-    },
+    leftBar: { alignSelf: 'stretch' },
     content: { flex: 1, paddingVertical: 12, paddingHorizontal: 14 },
     title: { fontSize: 16, fontWeight: '500', marginBottom: 2 },
     note: { fontSize: 13, marginBottom: 6 },
     stepsContainer: { marginBottom: 6, gap: 2 },
     stepRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 3, paddingLeft: 12, gap: 8 },
-    stepCheckbox: {
-      width: 16,
-      height: 16,
-      borderRadius: 3,
-      borderWidth: 1.5,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
+    stepCheckbox: { width: 16, height: 16, borderRadius: 3, borderWidth: 1.5, justifyContent: 'center', alignItems: 'center' },
     stepCheckmark: { fontSize: 10, color: '#FFFFFF', fontWeight: '700' },
     stepTitle: { flex: 1, fontSize: 13 },
     metaRow: { flexDirection: 'row', alignItems: 'center', marginTop: 2, gap: 8, flexWrap: 'wrap' },

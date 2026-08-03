@@ -19,7 +19,7 @@ import ErrorBoundary from '../components/ErrorBoundary';
 import ThemedText from '../components/ThemedText';
 
 export default function HomeScreen({ navigation }) {
-  const { theme } = useTheme();
+  const { theme, styleConfig } = useTheme();
   const { imageUri, opacity, hasBackground } = useBackground();
   const { tasks, isLoading, groups, currentGroupId, setCurrentGroupId, completeTask, removeTask, toggleStep, toggleStar } = useTasks();
 
@@ -145,6 +145,7 @@ export default function HomeScreen({ navigation }) {
     );
   };
 
+  const headerStyle = styleConfig?.headerStyle || {};
   const dynamicStyles = createStyles(theme);
 
   const groupChoirComponent = groups.length > 0 ? (
@@ -177,7 +178,7 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <Container style={dynamicStyles.container} {...imageProps}>
-      <View style={dynamicStyles.topBar}>
+      <View style={[dynamicStyles.topBar, headerStyle]}>
         <TouchableOpacity style={[dynamicStyles.newButton, { backgroundColor: theme.primary }]} onPress={handleNewTask} activeOpacity={0.7}>
           <ThemedText style={dynamicStyles.newButtonText}>+ 新建任务</ThemedText>
         </TouchableOpacity>

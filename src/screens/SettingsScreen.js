@@ -1,4 +1,4 @@
-// 设置页面（v1.3.0 - 自定义字体版）
+// 设置页面
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useTheme, ThemeMode, ThemeModeLabels } from '../context/ThemeContext';
@@ -15,8 +15,10 @@ import ThemedText from '../components/ThemedText';
 import { useBackground } from '../context/BackgroundContext';
 import { useReminder } from '../context/ReminderContext';
 
+const TASK_BG_PRESETS = ['#3B82F6', '#EF4444', '#F59E0B', '#22C55E', '#8B5CF6', '#EC4899', '#06B6D4', '#F97316'];
+
 export default function SettingsScreen({ navigation }) {
-  const { theme, themeMode, isDark, themeStyle, availableStyles } = useTheme();
+  const { theme, themeMode, isDark, themeStyle, availableStyles, taskBgEnabled, taskBgColor, setTaskBgEnabled, setTaskBgColor } = useTheme();
   const currentStyleName = availableStyles.find(s => s.id === themeStyle)?.name || 'Apple';
   const { currentFont } = useFont();
   const { tasks, loadTasks, groups, addGroup, editGroup, removeGroup, loadGroups, resetDemoTasks } = useTasks();
@@ -95,6 +97,35 @@ export default function SettingsScreen({ navigation }) {
         </View>
         <Text style={[styles.settingArrow, { color: theme.textTertiary }]}>›</Text>
       </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.settingItem, { backgroundColor: theme.cardBackground }]}
+        onPress={() => setTaskBgEnabled(!taskBgEnabled)}
+      >
+        <View style={styles.settingLeft}>
+          <ThemedText style={[styles.settingLabel, { color: theme.textPrimary }]}>任务背景色</ThemedText>
+          <ThemedText style={[styles.settingValue, { color: theme.textSecondary }]}>
+            {taskBgEnabled ? '已开启 · 点击色块更换' : '已关闭 · 使用白色卡片'}
+          </ThemedText>
+        </View>
+        <View style={[styles.toggleIndicator, { backgroundColor: taskBgEnabled ? theme.primary : theme.separator }]}>
+          {taskBgEnabled && <Text style={styles.toggleCheck}>✓</Text>}
+        </View>
+      </TouchableOpacity>
+      {taskBgEnabled && (
+        <View style={[styles.colorRow, { backgroundColor: theme.cardBackground }]}>
+          {TASK_BG_PRESETS.map((color) => (
+            <TouchableOpacity
+              key={color}
+              style={[
+                styles.colorDot,
+                { backgroundColor: color },
+                taskBgColor === color && { borderWidth: 3, borderColor: theme.textPrimary },
+              ]}
+              onPress={() => setTaskBgColor(color)}
+            />
+          ))}
+        </View>
+      )}
       <TouchableOpacity
         style={[styles.settingItem, { backgroundColor: theme.cardBackground }]}
         onPress={() => navigation.navigate('BackgroundSettings')}
@@ -218,6 +249,10 @@ function createStyles(theme) {
     settingValue: { fontSize: 12 },
     settingArrow: { fontSize: 20, fontWeight: '300', marginLeft: 8 },
     themeIndicator: { width: 24, height: 24, borderRadius: 12, borderWidth: 1 },
+    toggleIndicator: { width: 28, height: 28, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
+    toggleCheck: { color: '#FFFFFF', fontSize: 14, fontWeight: '700' },
+    colorRow: { flexDirection: 'row', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10, marginBottom: 6, gap: 8, flexWrap: 'wrap' },
+    colorDot: { width: 32, height: 32, borderRadius: 16, borderWidth: 2, borderColor: 'transparent' },
     fontPreview: { padding: 14, borderRadius: 10, marginBottom: 6, borderWidth: 1 },
     fontPreviewLabel: { fontSize: 11, fontWeight: '600', marginBottom: 8, textTransform: 'uppercase' },
     fontPreviewText: { fontSize: 18, marginBottom: 6 },

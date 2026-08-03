@@ -71,7 +71,7 @@ export function BackgroundProvider({ children }) {
     setPermissionStatus(status);
   }
 
-  // 请求相册权限（如果被永久拒绝则跳转系统设置）
+  // 请求相册权限
   const requestPermission = useCallback(async () => {
     const { status, canAskAgain } = await ImagePicker.getMediaLibraryPermissionsAsync();
 
@@ -81,6 +81,7 @@ export function BackgroundProvider({ children }) {
     }
 
     if (!canAskAgain) {
+      // 被永久拒绝
       Alert.alert(
         '需要相册权限',
         '相册权限已被永久拒绝，请在系统设置中手动开启',
@@ -89,15 +90,18 @@ export function BackgroundProvider({ children }) {
           { text: '去设置', onPress: () => Linking.openSettings() },
         ]
       );
+      setPermissionStatus('denied');
       return false;
     }
 
+    // 弹出权限请求
     const result = await ImagePicker.requestMediaLibraryPermissionsAsync();
     setPermissionStatus(result.status);
     return result.status === 'granted';
   }, []);
 
   const selectImage = useCallback(async (mode = 'light') => {
+    // 先检查权限
     const { status } = await ImagePicker.getMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
       const granted = await requestPermission();

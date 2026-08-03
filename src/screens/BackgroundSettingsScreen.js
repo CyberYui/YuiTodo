@@ -1,7 +1,7 @@
 // 背景设置页面
-// 职责：选图、预览、透明度调节、权限提示
+// 职责：权限管理、选图、预览、透明度调节
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ImageBackground, Dimensions, Linking } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { useTheme } from '../context/ThemeContext';
@@ -19,6 +19,13 @@ export default function BackgroundSettingsScreen({ navigation }) {
   const currentImage = activeMode === 'light' ? lightImageUri : darkImageUri;
   const currentOpacity = activeMode === 'light' ? lightOpacity : darkOpacity;
 
+  // 页面打开时，如果权限状态未知则主动请求
+  useEffect(() => {
+    if (permissionStatus === 'undetermined') {
+      requestPermission();
+    }
+  }, [permissionStatus, requestPermission]);
+
   const handleSelectImage = () => {
     if (permissionStatus === 'denied') {
       Linking.openSettings();
@@ -31,22 +38,32 @@ export default function BackgroundSettingsScreen({ navigation }) {
     removeBackground();
   };
 
+  const isPermissionGranted = permissionStatus === 'granted';
   const isPermissionDenied = permissionStatus === 'denied';
 
   return (
     <View style={styles.container}>
-      {/* 权限提示 */}
-      {isPermissionDenied && (
-        <View style={styles.permissionBanner}>
-          <ThemedText style={[styles.permissionText, { color: theme.danger }]}>
-            ⚠ 相册权限被拒绝，无法选择图片。
+      {/* 权限状态区 */}
+      <View style={[styles.permissionSection, { backgroundColor: isPermissionGranted ? theme.success + '15' : theme.danger + '15', borderColor: isPermissionGranted ? theme.success + '40' : theme.danger + '40' }]}>
+        <ThemedText style={[styles.permissionIcon, { color: isPermissionGranted ? theme.success : theme.danger }]}>
+          {isPermissionGranted ? '✓' : '⚠'}
+        </ThemedText>
+        <View style={styles.permissionContent}>
+          <ThemedText style={[styles.permissionTitle, { color: isPermissionGranted ? theme.success : theme.danger }]}>
+            {isPermissionGranted ? '相册权限已授权' : '需要相册权限'}
           </ThemedText>
-          <TouchableOpacity onPress={() => Linking.openSettings()} style={[styles.permissionButton, { borderColor: theme.danger }]}>
-            <ThemedText style={[styles.permissionButtonText, { color: theme.danger }]}>去系统设置开启</ThemedText>
-          </TouchableOpacity>
+          <ThemedText style={[styles.permissionDesc, { color: theme.textSecondary }]}>
+            {isPermissionGranted ? '可以正常选择和更换背景图片' : '请在系统设置中开启相册访问权限'}
+          </ThemedText>
         </View>
-      )}
+        {!isPermissionGranted && (
+          <TouchableOpacity onPress={() => Linking.openSettings()} style={[styles.permissionBtn, { backgroundColor: theme.danger }]}>
+            <ThemedText style={styles.permissionBtnText}>去设置</ThemedText>
+          </TouchableOpacity>
+        )}
+      </View>
 
+      {/* 浅色/深色切换 */}
       <View style={styles.tabBar}>
         <TouchableOpacity
           style={[styles.tab, activeMode === 'light' && styles.tabActive, { borderColor: theme.separator }]}
@@ -61,6 +78,8 @@ export default function BackgroundSettingsScreen({ navigation }) {
           <ThemedText style={[styles.tabText, activeMode === 'dark' && { color: theme.primary }]}>🌙 深色</ThemedText>
         </TouchableOpacity>
       </View>
+
+      {/* 预览区 */}
       <View style={styles.previewSection}>
         {hasBackground ? (
           <ImageBackground
@@ -85,6 +104,7 @@ export default function BackgroundSettingsScreen({ navigation }) {
         )}
       </View>
 
+      {/* 操作按钮 */}
       <View style={styles.buttonSection}>
         <TouchableOpacity
           style={[styles.button, { backgroundColor: isPermissionDenied ? theme.textTertiary : theme.primary }]}
@@ -101,6 +121,7 @@ export default function BackgroundSettingsScreen({ navigation }) {
         )}
       </View>
 
+      {/* 透明度调节 */}
       {hasBackground && (
         <View style={[styles.opacitySection, { backgroundColor: theme.cardBackground, borderColor: theme.separator }]}>
           <View style={styles.opacityHeader}>
@@ -133,26 +154,23 @@ export default function BackgroundSettingsScreen({ navigation }) {
 function createStyles(theme) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: theme.background },
-    permissionBanner: {
+    permissionSection: {
+      flexDirection: 'row',
+      alignItems: 'center',
       marginHorizontal: 16,
       marginTop: 16,
       marginBottom: 8,
       padding: 12,
       borderRadius: 10,
-      backgroundColor: theme.danger + '15',
       borderWidth: 1,
-      borderColor: theme.danger + '40',
-      gap: 8,
+      gap: 10,
     },
-    permissionText: { fontSize: 13, fontWeight: '500' },
-    permissionButton: {
-      alignSelf: 'flex-start',
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-      borderRadius: 6,
-      borderWidth: 1,
-    },
-    permissionButtonText: { fontSize: 13, fontWeight: '600' },
+    permissionIcon: { fontSize: 20, fontWeight: '700' },
+    permissionContent: { flex: 1 },
+    permissionTitle: { fontSize: 13, fontWeight: '600', marginBottom: 2 },
+    permissionDesc: { fontSize: 11 },
+    permissionBtn: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8 },
+    permissionBtnText: { color: '#FFFFFF', fontSize: 13, fontWeight: '600' },
     tabBar: { flexDirection: 'row', marginHorizontal: 16, marginTop: 8, marginBottom: 8, backgroundColor: theme.separator + '40', borderRadius: 8, padding: 3 },
     tab: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 6 },
     tabActive: { backgroundColor: theme.cardBackground },
