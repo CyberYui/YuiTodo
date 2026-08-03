@@ -16,6 +16,7 @@ import { FontProvider } from './src/context/FontContext';
 import { BackgroundProvider } from './src/context/BackgroundContext';
 import { ReminderProvider } from './src/context/ReminderContext';
 import { TaskProvider } from './src/context/TaskContext';
+import { ListProvider } from './src/context/ListContext';
 
 // 导入页面组件
 import HomeScreen from './src/screens/HomeScreen';
@@ -24,6 +25,8 @@ import SettingsScreen from './src/screens/SettingsScreen';
 import FontPickerScreen from './src/components/FontPicker';
 import BackgroundSettingsScreen from './src/screens/BackgroundSettingsScreen';
 import ReminderSettingsScreen from './src/screens/ReminderSettingsScreen';
+import IconPickerScreen from './src/screens/IconPickerScreen';
+import RecycleBinScreen from './src/screens/RecycleBinScreen';
 
 // 导入字体加载Hook
 import { useFontLoader } from './src/hooks/useFontLoader';
@@ -95,6 +98,16 @@ function AppContent() {
           component={ReminderSettingsScreen}
           options={{ title: '每日提醒' }}
         />
+        <Stack.Screen
+          name="IconPicker"
+          component={IconPickerScreen}
+          options={{ title: '应用图标' }}
+        />
+        <Stack.Screen
+          name="RecycleBin"
+          component={RecycleBinScreen}
+          options={{ title: '回收站' }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -116,7 +129,10 @@ export default function App() {
               <ReminderProvider>
                 {/* 任务数据Provider：提供任务列表和操作函数 */}
                 <TaskProvider>
-                  <AppContent />
+                  {/* 列表数据Provider */}
+                  <ListProvider>
+                    <AppContent />
+                  </ListProvider>
                 </TaskProvider>
               </ReminderProvider>
             </BackgroundProvider>

@@ -16,6 +16,7 @@ import { getDailyCompletionCounts, getTotalCompletions, getAverageCompletions } 
 import { calculateOverviewCounts, calculateRecurrenceFulfillment, getTodayProgress } from '../statistics/OverviewCards';
 import { LineChart, BarChart } from '../components/StatChart';
 import StatCard, { OverviewMiniCard } from '../components/StatCard';
+import AnnualHeatmap from '../components/AnnualHeatmap';
 
 const PeriodLabels = {
   [StatPeriod.WEEK]: '近7天',
@@ -156,6 +157,9 @@ export default function StatisticsScreen() {
           </Text>
         </View>
       </View>
+
+      {/* 年度完成热力图 */}
+      <AnnualHeatmap />
 
       {/* 循环任务履约达成率 */}
       <View style={[styles.fulfillmentCard, { backgroundColor: theme.cardBackground }]}>

@@ -249,10 +249,10 @@ export default function TaskEditorModal({ visible, task, onClose, onSave }) {
               <TextInput style={[styles.input, { color: theme.textPrimary, borderColor: theme.separator }]} placeholder="输入任务名称..." placeholderTextColor={theme.textTertiary} value={title} onChangeText={setTitle} maxLength={100} />
             </View>
 
-            {/* 2. 备注 */}
+             {/* 2. 备注（富文本） */}
             <View style={styles.fieldGroup}>
               <Text style={[styles.label, { color: theme.textSecondary }]}>备注</Text>
-              <TextInput style={[styles.input, styles.textArea, { color: theme.textPrimary, borderColor: theme.separator }]} placeholder="添加备注（可选）..." placeholderTextColor={theme.textTertiary} value={note} onChangeText={setNote} multiline numberOfLines={3} maxLength={500} />
+              <TextInput style={[styles.input, styles.textArea, { color: theme.textPrimary, borderColor: theme.separator }]} placeholder="添加备注（可选）&#10;支持多行文本..." placeholderTextColor={theme.textTertiary} value={note} onChangeText={setNote} multiline numberOfLines={5} maxLength={1000} textAlignVertical="top" />
             </View>
 
             {/* 3. 起始日期 */}

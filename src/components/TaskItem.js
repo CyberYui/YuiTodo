@@ -1,4 +1,4 @@
-// 单个任务条目组件（带滑动删除/完成效果）
+// 单个任务条目组件 v1.6.0
 import React, { useRef, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, PanResponder } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
@@ -6,11 +6,12 @@ import { TaskStatus, RecurrenceLabels, TASK_COLORS } from '../utils/constants';
 import { formatDateFriendly, isDateToday, isExpired } from '../utils/dateHelpers';
 import ThemedText from './ThemedText';
 
-const SWIPE_THRESHOLD = 100;
+const SWIPE_THRESHOLD = 80;
 
 export default function TaskItem({ task, onPress, onSwipeComplete, onSwipeDelete, onToggleStep, onToggleStar }) {
   const { theme, styleConfig, taskBgEnabled, taskBgColor } = useTheme();
-  const styles = createStyles(theme);
+  const translateX = useRef(new Animated.Value(0)).current;
+  const [swiping, setSwiping] = useState(false);
 
   const isDone = task.status === TaskStatus.DONE;
   const isOverdue = isExpired(task.end_time) && task.status === TaskStatus.PENDING;
@@ -27,9 +28,16 @@ export default function TaskItem({ task, onPress, onSwipeComplete, onSwipeDelete
   const labelColor = taskTheme.label;
   const bgColor = taskTheme.bg;
 
+  // 主题属性
+  const cardStyle = styleConfig?.cardStyle || 'elevated';
+  const radius = styleConfig?.radius || 10;
   const showLeftBar = styleConfig?.leftBar !== false;
-  const translateX = useRef(new Animated.Value(0)).current;
-  const [swiping, setSwiping] = useState(false);
+  const density = styleConfig?.density || 'standard';
+  const divider = styleConfig?.divider === true;
+
+  // 间距根据密度调整
+  const paddingV = density === 'compact' ? 8 : density === 'spacious' ? 14 : 10;
+  const paddingH = density === 'compact' ? 10 : density === 'spacious' ? 16 : 12;
 
   function blendWithWhite(hex, whiteRatio) {
     if (!hex || typeof hex !== 'string' || !hex.startsWith('#')) return '#FFFFFF';
@@ -45,43 +53,39 @@ export default function TaskItem({ task, onPress, onSwipeComplete, onSwipeDelete
   }
 
   function getCardStyle() {
-    const cardStyle = styleConfig?.cardStyle || 'elevated';
-    const radius = styleConfig?.cardRadius || 10;
-    const shadow = styleConfig?.shadow || {};
-    if (cardStyle === 'bordered') return { borderRadius: radius, borderWidth: 1, borderColor: theme.separator, ...shadow };
-    if (cardStyle === 'flat') return { borderRadius: radius };
-    return { borderRadius: radius, ...shadow };
+    const shadow = styleConfig?.shadow !== false;
+    switch (cardStyle) {
+      case 'bordered': return { borderRadius: radius, borderWidth: 1, borderColor: theme.separator };
+      case 'glass': return { borderRadius: radius, borderWidth: 1, borderColor: theme.separator + '80', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 };
+      case 'lined': return { borderRadius: radius, borderBottomWidth: 2, borderColor: theme.separator };
+      case 'flat': return { borderRadius: radius };
+      default: return { borderRadius: radius, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1 };
+    }
   }
 
-  const resetPosition = () => { Animated.spring(translateX, { toValue: 0, useNativeDriver: true, bounciness: 0 }).start(); };
+  const resetPosition = () => { Animated.spring(translateX, { toValue: 0, useNativeDriver: true, bounciness: 4 }).start(); };
 
   const panResponder = useRef(
     PanResponder.create({
-      onMoveShouldSetPanResponder: (_, gestureState) => Math.abs(gestureState.dx) > 10 && Math.abs(gestureState.dy) < 20,
+      onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dx) > 8 && Math.abs(g.dy) < 15,
       onPanResponderGrant: () => setSwiping(true),
-      onPanResponderMove: (_, gestureState) => {
-        if (gestureState.dx < -20 || gestureState.dx > 20) translateX.setValue(gestureState.dx);
-      },
-      onPanResponderRelease: (_, gestureState) => {
+      onPanResponderMove: (_, g) => { translateX.setValue(g.dx); },
+      onPanResponderRelease: (_, g) => {
         setSwiping(false);
-        if (gestureState.dx < -SWIPE_THRESHOLD) {
-          // 左滑 → 删除
-          Animated.timing(translateX, { toValue: -400, duration: 200, useNativeDriver: true }).start(() => {
-            onSwipeDelete();
-            resetPosition();
-          });
-        } else if (gestureState.dx > SWIPE_THRESHOLD) {
-          // 右滑 → 完成
-          Animated.timing(translateX, { toValue: 400, duration: 200, useNativeDriver: true }).start(() => {
-            onSwipeComplete();
-            resetPosition();
-          });
+        if (g.dx < -SWIPE_THRESHOLD) {
+          Animated.timing(translateX, { toValue: -400, duration: 180, useNativeDriver: true }).start(() => { onSwipeDelete(); resetPosition(); });
+        } else if (g.dx > SWIPE_THRESHOLD) {
+          Animated.timing(translateX, { toValue: 400, duration: 180, useNativeDriver: true }).start(() => { onSwipeComplete(); resetPosition(); });
         } else {
           resetPosition();
         }
       },
     })
   ).current;
+
+  // 滑动时操作文字渐显
+  const rightOpacity = translateX.interpolate({ inputRange: [0, SWIPE_THRESHOLD], outputRange: [0, 1], extrapolate: 'clamp' });
+  const leftOpacity = translateX.interpolate({ inputRange: [-SWIPE_THRESHOLD, 0], outputRange: [1, 0], extrapolate: 'clamp' });
 
   const handleStepPress = (stepId) => { if (onToggleStep) onToggleStep(task.id, stepId); };
   function getStatusLabel() { if (isDone) return '已完成'; if (isOverdue) return '已逾期'; if (isToday) return '今天'; return ''; }
@@ -93,52 +97,52 @@ export default function TaskItem({ task, onPress, onSwipeComplete, onSwipeDelete
     return typeLabel;
   }
 
-  // 滑动时左侧动作预览（右滑显示完成）
-  const rightActionOpacity = translateX.interpolate({
-    inputRange: [0, SWIPE_THRESHOLD],
-    outputRange: [0, 1],
-    extrapolate: 'clamp',
-  });
-
-  // 滑动时右侧动作预览（左滑显示删除）
-  const leftActionOpacity = translateX.interpolate({
-    inputRange: [-SWIPE_THRESHOLD, 0],
-    outputRange: [1, 0],
-    extrapolate: 'clamp',
-  });
-
   return (
-    <View style={styles.swipeContainer}>
-      {/* 右侧背景（左滑时显示-删除） */}
-      <View style={[styles.actionBackground, styles.actionRight, { backgroundColor: theme.swipeDeleteBg }]}>
-        <Animated.View style={[styles.actionContent, { opacity: leftActionOpacity }]}>
+    <View style={styles.swipeWrap}>
+      {/* 操作背景 */}
+      <View style={[styles.actionBg, styles.actionRight, { backgroundColor: theme.swipeDeleteBg }]}>
+        <Animated.View style={[styles.actionContent, { opacity: leftOpacity }]}>
           <Text style={[styles.actionIcon, { color: theme.danger }]}>🗑</Text>
           <Text style={[styles.actionLabel, { color: theme.danger }]}>删除</Text>
         </Animated.View>
       </View>
-
-      {/* 左侧背景（右滑时显示-完成） */}
-      <View style={[styles.actionBackground, styles.actionLeft, { backgroundColor: theme.swipeCompleteBg }]}>
-        <Animated.View style={[styles.actionContent, { opacity: rightActionOpacity }]}>
+      <View style={[styles.actionBg, styles.actionLeft, { backgroundColor: theme.swipeCompleteBg }]}>
+        <Animated.View style={[styles.actionContent, { opacity: rightOpacity }]}>
           <Text style={[styles.actionIcon, { color: theme.done }]}>{hasSteps && !allStepsCompleted ? '▶' : '✓'}</Text>
-          <Text style={[styles.actionLabel, { color: theme.done }]}>{hasSteps && !allStepsCompleted ? `下一步 ${completedSteps}/${totalSteps}` : '完成'}</Text>
+          <Text style={[styles.actionLabel, { color: theme.done }]}>{hasSteps && !allStepsCompleted ? `下一步` : '完成'}</Text>
         </Animated.View>
       </View>
 
-      {/* 卡片内容 */}
+      {/* 卡片 */}
       <Animated.View style={[{ transform: [{ translateX }] }]} {...panResponder.panHandlers}>
         <TouchableOpacity
           activeOpacity={swiping ? 1 : 0.8}
           delayLongPress={400}
           onPress={() => onPress(task)}
           onLongPress={() => onPress(task)}
-          style={[styles.card, { backgroundColor: getCardBackground() }, getCardStyle(), { opacity: isDone ? 0.6 : 1 }]}
+          style={[
+            styles.card,
+            { backgroundColor: getCardBackground() },
+            getCardStyle(),
+            { opacity: isDone ? 0.6 : 1 },
+            divider && { borderBottomWidth: 1, borderBottomColor: theme.separator },
+          ]}
         >
           {showLeftBar && <View style={[styles.leftBar, { backgroundColor: isDone ? theme.done : taskColor }]} />}
 
-          <View style={styles.content}>
+          <View style={[styles.content, { paddingVertical: paddingV, paddingHorizontal: paddingH }]}>
             <ThemedText style={[styles.title, { color: theme.textPrimary, textDecorationLine: isDone ? 'line-through' : 'none' }]} numberOfLines={1}>{task.title}</ThemedText>
             {task.note ? <ThemedText style={[styles.note, { color: theme.textSecondary }]} numberOfLines={1}>{task.note}</ThemedText> : null}
+
+            {/* 子任务进度条 */}
+            {hasSteps && (
+              <View style={styles.progressBarContainer}>
+                <View style={styles.progressBarBg}>
+                  <View style={[styles.progressBarFill, { width: `${(completedSteps / totalSteps) * 100}%`, backgroundColor: taskColor }]} />
+                </View>
+                <ThemedText style={[styles.progressBarText, { color: theme.textTertiary }]}>{completedSteps}/{totalSteps}</ThemedText>
+              </View>
+            )}
 
             {hasSteps && (
               <View style={styles.stepsContainer}>
@@ -174,33 +178,34 @@ export default function TaskItem({ task, onPress, onSwipeComplete, onSwipeDelete
   );
 }
 
-function createStyles(theme) {
-  return StyleSheet.create({
-    swipeContainer: { marginHorizontal: 16, marginVertical: 4, borderRadius: 12, overflow: 'hidden' },
-    card: { flexDirection: 'row', overflow: 'hidden' },
-    leftBar: { width: 4, alignSelf: 'stretch' },
-    content: { flex: 1, paddingVertical: 12, paddingHorizontal: 14 },
-    title: { fontSize: 16, fontWeight: '500', marginBottom: 2 },
-    note: { fontSize: 13, marginBottom: 6 },
-    stepsContainer: { marginBottom: 6, gap: 2 },
-    stepRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 3, paddingLeft: 12, gap: 8 },
-    stepCheckbox: { width: 16, height: 16, borderRadius: 3, borderWidth: 1.5, justifyContent: 'center', alignItems: 'center' },
-    stepCheckmark: { fontSize: 10, color: '#FFFFFF', fontWeight: '700' },
-    stepTitle: { flex: 1, fontSize: 13 },
-    metaRow: { flexDirection: 'row', alignItems: 'center', marginTop: 2, gap: 8, flexWrap: 'wrap' },
-    timeText: { fontSize: 12 },
-    badge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-    badgeText: { fontSize: 11, fontWeight: '500' },
-    rightIndicator: { justifyContent: 'flex-start', alignItems: 'flex-start', paddingRight: 12, paddingTop: 10, gap: 4 },
-    starButton: { padding: 4 },
-    starText: { fontSize: 20 },
-    pausedText: { fontSize: 14 },
-    // 滑动操作背景
-    actionBackground: { position: 'absolute', top: 0, bottom: 0, justifyContent: 'center', paddingHorizontal: 24 },
-    actionLeft: { left: 0 },
-    actionRight: { right: 0 },
-    actionContent: { alignItems: 'center', justifyContent: 'center', gap: 4 },
-    actionIcon: { fontSize: 22 },
-    actionLabel: { fontSize: 13, fontWeight: '600' },
-  });
-}
+const styles = StyleSheet.create({
+  swipeWrap: { marginHorizontal: 16, marginVertical: 3, borderRadius: 12, overflow: 'hidden' },
+  card: { flexDirection: 'row', overflow: 'hidden' },
+  leftBar: { width: 4, alignSelf: 'stretch' },
+  content: { flex: 1 },
+  title: { fontSize: 16, fontWeight: '500', marginBottom: 2 },
+  note: { fontSize: 13, marginBottom: 4 },
+    progressBarContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 6, gap: 8 },
+    progressBarBg: { flex: 1, height: 4, backgroundColor: '#00000010', borderRadius: 2, overflow: 'hidden' },
+    progressBarFill: { height: '100%', borderRadius: 2 },
+    progressBarText: { fontSize: 11, fontWeight: '600' },
+    stepsContainer: { marginBottom: 4, gap: 2 },
+  stepRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 2, paddingLeft: 12, gap: 8 },
+  stepCheckbox: { width: 16, height: 16, borderRadius: 3, borderWidth: 1.5, justifyContent: 'center', alignItems: 'center' },
+  stepCheckmark: { fontSize: 10, color: '#FFFFFF', fontWeight: '700' },
+  stepTitle: { flex: 1, fontSize: 13 },
+  metaRow: { flexDirection: 'row', alignItems: 'center', marginTop: 2, gap: 8, flexWrap: 'wrap' },
+  timeText: { fontSize: 12 },
+  badge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
+  badgeText: { fontSize: 11, fontWeight: '500' },
+  rightIndicator: { justifyContent: 'flex-start', alignItems: 'flex-start', paddingRight: 10, paddingTop: 8, gap: 4 },
+  starButton: { padding: 4 },
+  starText: { fontSize: 18 },
+  pausedText: { fontSize: 14 },
+  actionBg: { position: 'absolute', top: 0, bottom: 0, justifyContent: 'center', paddingHorizontal: 24 },
+  actionLeft: { left: 0 },
+  actionRight: { right: 0 },
+  actionContent: { alignItems: 'center', justifyContent: 'center', gap: 4 },
+  actionIcon: { fontSize: 20 },
+  actionLabel: { fontSize: 12, fontWeight: '600' },
+});

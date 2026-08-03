@@ -4,7 +4,7 @@
 import { openDatabase } from 'expo-sqlite/legacy';
 
 const DATABASE_NAME = 'yuitodo.db';
-const CURRENT_DB_VERSION = 4;
+const CURRENT_DB_VERSION = 6;
 
 let databaseInstance = null;
 let initPromise = null;
@@ -65,10 +65,19 @@ async function initializeTables(db) {
       recurrence_id INTEGER,
       is_starred INTEGER DEFAULT 0,
       group_id INTEGER DEFAULT 0,
+      list_id INTEGER DEFAULT 1,
       created_at INTEGER NOT NULL,
       updated_at INTEGER NOT NULL,
       sort_order INTEGER DEFAULT 0,
       FOREIGN KEY (recurrence_id) REFERENCES recurrence_rule(id) ON DELETE SET NULL
+    )`,
+    `CREATE TABLE IF NOT EXISTS task_list (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      icon TEXT DEFAULT '📋',
+      sort_order INTEGER DEFAULT 0,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL
     )`,
     `CREATE TABLE IF NOT EXISTS task_group (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -134,6 +143,18 @@ async function migrateSchema(db) {
 
     if (currentVersion < 4) {
       try { await db.execAsync([{ sql: 'ALTER TABLE task ADD COLUMN reminder_time TEXT', args: [] }], false); } catch (e) {}
+    }
+
+    if (currentVersion < 5) {
+      try { await db.execAsync([{ sql: 'ALTER TABLE task ADD COLUMN deleted_at INTEGER', args: [] }], false); } catch (e) {}
+    }
+
+    if (currentVersion < 6) {
+      try { await db.execAsync([{ sql: 'ALTER TABLE task ADD COLUMN list_id INTEGER DEFAULT 1', args: [] }], false); } catch (e) {}
+      // 创建默认列表
+      try {
+        await db.execAsync([{ sql: "INSERT OR IGNORE INTO task_list (id, name, icon, sort_order, created_at, updated_at) VALUES (1, '我的任务', '📋', 0, ?, ?)", args: [Date.now(), Date.now()] }], false);
+      } catch (e) {}
     }
 
     await db.execAsync(

@@ -1,6 +1,8 @@
 // 设置页面
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 import { useTheme, ThemeMode, ThemeModeLabels } from '../context/ThemeContext';
 import { useFont } from '../context/FontContext';
 import { useTasks } from '../context/TaskContext';
@@ -38,6 +40,27 @@ export default function SettingsScreen({ navigation }) {
         Alert.alert('完成', '所有任务已清空');
       }},
     ]);
+  };
+
+  const handleExportData = async () => {
+    try {
+      const exportData = {
+        version: APP_VERSION,
+        exportTime: new Date().toISOString(),
+        tasks: tasks,
+      };
+      const json = JSON.stringify(exportData, null, 2);
+      const fileName = `yuitodo-backup-${Date.now()}.json`;
+      const fileUri = `${FileSystem.documentDirectory}${fileName}`;
+      await FileSystem.writeAsStringAsync(fileUri, json);
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(fileUri);
+      } else {
+        Alert.alert('导出成功', `文件已保存到: ${fileUri}`);
+      }
+    } catch (e) {
+      Alert.alert('导出失败', e.message || '请重试');
+    }
   };
 
   const handleResetDemo = () => {
@@ -94,6 +117,16 @@ export default function SettingsScreen({ navigation }) {
         <View style={styles.settingLeft}>
           <ThemedText style={[styles.settingLabel, { color: theme.textPrimary }]}>主题风格</ThemedText>
           <ThemedText style={[styles.settingValue, { color: theme.textSecondary }]}>{currentStyleName}</ThemedText>
+        </View>
+        <Text style={[styles.settingArrow, { color: theme.textTertiary }]}>›</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.settingItem, { backgroundColor: theme.cardBackground }]}
+        onPress={() => navigation.navigate('IconPicker')}
+      >
+        <View style={styles.settingLeft}>
+          <ThemedText style={[styles.settingLabel, { color: theme.textPrimary }]}>应用图标</ThemedText>
+          <ThemedText style={[styles.settingValue, { color: theme.textSecondary }]}>更换桌面图标</ThemedText>
         </View>
         <Text style={[styles.settingArrow, { color: theme.textTertiary }]}>›</Text>
       </TouchableOpacity>
@@ -193,6 +226,19 @@ export default function SettingsScreen({ navigation }) {
           <ThemedText style={[styles.settingValue, { color: theme.textSecondary }]}>{tasks.length} 条</ThemedText>
         </View>
       </View>
+      <TouchableOpacity style={[styles.settingItem, { backgroundColor: theme.cardBackground }]} onPress={handleExportData}>
+        <View style={styles.settingLeft}>
+          <ThemedText style={[styles.settingLabel, { color: theme.primary }]}>导出数据</ThemedText>
+          <ThemedText style={[styles.settingValue, { color: theme.textTertiary }]}>导出为JSON文件</ThemedText>
+        </View>
+      </TouchableOpacity>
+      <TouchableOpacity style={[styles.settingItem, { backgroundColor: theme.cardBackground }]} onPress={() => navigation.navigate('RecycleBin')}>
+        <View style={styles.settingLeft}>
+          <ThemedText style={[styles.settingLabel, { color: theme.textPrimary }]}>回收站</ThemedText>
+          <ThemedText style={[styles.settingValue, { color: theme.textSecondary }]}>已删除的任务</ThemedText>
+        </View>
+        <Text style={[styles.settingArrow, { color: theme.textTertiary }]}>›</Text>
+      </TouchableOpacity>
       <TouchableOpacity style={[styles.settingItem, { backgroundColor: theme.cardBackground }]} onPress={handleResetDemo}>
         <View style={styles.settingLeft}>
           <ThemedText style={[styles.settingLabel, { color: theme.primary }]}>重置示例任务</ThemedText>

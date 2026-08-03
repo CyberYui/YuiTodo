@@ -9,6 +9,12 @@ import {
   updateTask,
   updateTaskStatus,
   deleteTask,
+  restoreTask,
+  softDeleteTask,
+  restoreDeletedTask,
+  permanentDeleteTask,
+  getDeletedTasks,
+  cleanupDeletedTasks,
 } from '../database/TaskTable';
 import {
   createRecurrenceRule,
@@ -48,6 +54,8 @@ export function TaskProvider({ children }) {
   const [groups, setGroups] = useState([]);
   // 当前选中的分组（0=全部）
   const [currentGroupId, setCurrentGroupId] = useState(0);
+  // 当前选中的列表（1=默认）
+  const [currentListId, setCurrentListId] = useState(1);
   // 加载状态
   const [isLoading, setIsLoading] = useState(true);
 
@@ -58,7 +66,11 @@ export function TaskProvider({ children }) {
     setIsLoading(true);
     try {
       // 从数据库读取所有活跃任务（包括已完成）
-      const dbTasks = await getAllActiveTasksIncludingDone();
+      let dbTasks = await getAllActiveTasksIncludingDone();
+      // 按列表过滤
+      if (currentListId > 0) {
+        dbTasks = dbTasks.filter(t => (t.list_id || 1) === currentListId);
+      }
 
       // 为每条任务加载关联的循环规则和步骤
       const tasksWithRules = [];
@@ -95,7 +107,7 @@ export function TaskProvider({ children }) {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [currentListId]);
 
   // 组件挂载时加载任务，首次启动创建演示任务
   useEffect(() => {
@@ -390,15 +402,93 @@ export function TaskProvider({ children }) {
   }, [tasks, loadTasks]);
 
   /**
-   * 删除任务（同时删除关联的步骤和完成记录）
+   * 删除任务（软删除，移入回收站）
    */
   const removeTask = useCallback(async (taskId) => {
-    // 先删除步骤
-    await deleteStepsByTask(taskId);
-    // 再删除任务
-    await deleteTask(taskId);
+    await softDeleteTask(taskId);
     await loadTasks();
   }, [loadTasks]);
+
+  /**
+   * 从回收站恢复任务
+   */
+  const restoreFromRecycleBin = useCallback(async (taskId) => {
+    await restoreDeletedTask(taskId);
+    await loadTasks();
+  }, [loadTasks]);
+
+  /**
+   * 永久删除任务
+   */
+  const permanentDeleteTaskCb = useCallback(async (taskId) => {
+    await deleteStepsByTask(taskId);
+    await permanentDeleteTask(taskId);
+    await loadTasks();
+  }, [loadTasks]);
+
+  /**
+   * 获取回收站任务
+   */
+  const getRecycleBinTasks = useCallback(async () => {
+    return await getDeletedTasks();
+  }, []);
+
+  /**
+   * 清空回收站
+   */
+  const emptyRecycleBin = useCallback(async () => {
+    const deletedTasks = await getDeletedTasks();
+    for (const task of deletedTasks) {
+      await deleteStepsByTask(task.id);
+      await permanentDeleteTask(task.id);
+    }
+    await loadTasks();
+  }, [loadTasks]);
+
+  /**
+   * 恢复已删除的任务（用于撤销删除）
+   */
+  const restoreTaskCallback = useCallback(async (task) => {
+    await restoreTask(task);
+    await loadTasks();
+  }, [loadTasks]);
+
+  /**
+   * 复制任务
+   */
+  const copyTask = useCallback(async (taskId) => {
+    const task = tasks.find((t) => t.id === taskId);
+    if (!task) return;
+
+    // 创建新任务（复制属性）
+    const newTask = {
+      title: `${task.title} (副本)`,
+      note: task.note || '',
+      start_time: task.start_time,
+      end_time: task.end_time,
+      deadline: task.deadline || null,
+      start_date: task.start_date || task.start_time,
+      color: task.color || '#3B82F6',
+      is_starred: 0,
+      group_id: task.group_id || 0,
+      sort_order: task.sort_order || 0,
+    };
+
+    const newId = await createTask(newTask);
+
+    // 复制步骤
+    if (task.steps && task.steps.length > 0) {
+      const newSteps = task.steps.map((step, idx) => ({
+        task_id: newId,
+        title: step.title,
+        sort_order: idx,
+      }));
+      await createSteps(newSteps);
+    }
+
+    await loadTasks();
+    return newId;
+  }, [tasks, loadTasks]);
 
   /**
    * 切换步骤完成状态（点击步骤勾选/取消）
@@ -483,6 +573,8 @@ export function TaskProvider({ children }) {
     groups,
     currentGroupId,
     setCurrentGroupId,
+    currentListId,
+    setCurrentListId,
     loadTasks,
     loadGroups,
     addTask,
@@ -490,6 +582,12 @@ export function TaskProvider({ children }) {
     changeTaskStatus,
     completeTask,
     removeTask,
+    restoreTask: restoreTaskCallback,
+    copyTask,
+    restoreFromRecycleBin,
+    permanentDeleteTask: permanentDeleteTaskCb,
+    getRecycleBinTasks,
+    emptyRecycleBin,
     toggleStep,
     toggleStar,
     pauseRecurrence,
@@ -499,8 +597,8 @@ export function TaskProvider({ children }) {
     editGroup,
     removeGroup,
     resetDemoTasks,
-  }), [tasks, isLoading, groups, currentGroupId, loadTasks, loadGroups, addTask, editTask, changeTaskStatus,
-       completeTask, removeTask, toggleStep, toggleStar, pauseRecurrence, resumeRecurrence, getTaskRecurrenceStatus,
+  }), [tasks, isLoading, groups, currentGroupId, currentListId, setCurrentListId, loadTasks, loadGroups, addTask, editTask, changeTaskStatus,
+       completeTask, removeTask, restoreTaskCallback, copyTask, restoreFromRecycleBin, permanentDeleteTaskCb, getRecycleBinTasks, emptyRecycleBin, toggleStep, toggleStar, pauseRecurrence, resumeRecurrence, getTaskRecurrenceStatus,
        addGroup, editGroup, removeGroup, resetDemoTasks]);
 
   return (
