@@ -34,7 +34,7 @@ export default function TaskItem({
   onToggleStep,
   onToggleStar,
 }) {
-  const { theme } = useTheme();
+  const { theme, taskBgMode, taskBgColor, styleConfig, isDark } = useTheme();
   const swipeableRef = useRef(null);
 
   // 动态样式
@@ -59,11 +59,24 @@ export default function TaskItem({
   const dateColor = taskTheme.date;
   const bgColor = taskTheme.bg;
 
+  function getCardBackground() {
+    const color = taskBgMode === 'uniform' ? taskBgColor : taskColor;
+    return hexToRgba(color, isDark ? 0.2 : 0.12);
+  }
+
+  function hexToRgba(hex, alpha) {
+    if (!hex || !hex.startsWith('#')) return `rgba(59,130,246,${alpha})`;
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+
   /**
    * 渲染左滑操作：删除
    */
   const renderLeftActions = () => (
-    <View style={[styles.leftAction, { backgroundColor: theme.swipeDeleteBg }]}>
+    <View style={[styles.leftAction, { backgroundColor: theme.swipeDeleteBg, borderRadius: styleConfig?.cardRadius || 10 }]}>
       <Text style={[styles.actionIcon, { color: theme.danger }]}>🗑</Text>
       <Text style={[styles.actionText, { color: theme.danger }]}>删除</Text>
     </View>
@@ -80,7 +93,7 @@ export default function TaskItem({
       actionIcon = '▶';
     }
     return (
-      <View style={[styles.rightAction, { backgroundColor: theme.swipeCompleteBg }]}>
+      <View style={[styles.rightAction, { backgroundColor: theme.swipeCompleteBg, borderRadius: styleConfig?.cardRadius || 10 }]}>
         <Text style={[styles.actionIcon, { color: theme.done }]}>{actionIcon}</Text>
         <Text style={[styles.actionText, { color: theme.done }]}>{actionText}</Text>
       </View>
@@ -144,7 +157,7 @@ export default function TaskItem({
       overshootFriction={8}
     >
       <TouchableOpacity
-        style={[styles.card, { backgroundColor: theme.cardBackground, opacity: isDone ? 0.6 : 1 }]}
+        style={[styles.card, { backgroundColor: getCardBackground(), opacity: isDone ? 0.6 : 1, borderRadius: styleConfig?.cardRadius || 10 }]}
         onPress={() => onPress(task)}
         onLongPress={() => onPress(task)}
         activeOpacity={0.8}
