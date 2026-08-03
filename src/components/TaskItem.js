@@ -43,21 +43,25 @@ export default function TaskItem({
   // 开启背景色时不显示左侧细条（避免双色块）
   const showLeftBar = leftBarWidth > 0 && !taskBgEnabled;
 
-  function hexToRgba(hex, alpha) {
-    if (!hex || typeof hex !== 'string' || !hex.startsWith('#')) {
-      return `rgba(59,130,246,${alpha})`;
-    }
-    const r = parseInt(hex.slice(1, 3), 16) || 0;
-    const g = parseInt(hex.slice(3, 5), 16) || 0;
-    const b = parseInt(hex.slice(5, 7), 16) || 0;
-    return `rgba(${r},${g},${b},${alpha})`;
-  }
+
 
   function getCardBackground() {
     if (taskBgEnabled && taskBgColor) {
-      return hexToRgba(taskBgColor, 0.08);
+      // 纯色不透明：选中颜色与白色混合成浅色背景，不透背景图
+      return blendWithWhite(taskBgColor, 0.85);
     }
     return theme.cardBackground;
+  }
+
+  function blendWithWhite(hex, whiteRatio) {
+    if (!hex || typeof hex !== 'string' || !hex.startsWith('#')) return '#FFFFFF';
+    const r = parseInt(hex.slice(1, 3), 16) || 0;
+    const g = parseInt(hex.slice(3, 5), 16) || 0;
+    const b = parseInt(hex.slice(5, 7), 16) || 0;
+    const nr = Math.round(r * (1 - whiteRatio) + 255 * whiteRatio);
+    const ng = Math.round(g * (1 - whiteRatio) + 255 * whiteRatio);
+    const nb = Math.round(b * (1 - whiteRatio) + 255 * whiteRatio);
+    return `rgb(${nr},${ng},${nb})`;
   }
 
   const renderLeftActions = (progress) => (
