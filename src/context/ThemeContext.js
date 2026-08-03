@@ -9,7 +9,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { useColorScheme } from 'react-native';
-import { LightTheme, DarkTheme } from '../theme/colors';
+import { getTheme, getStyleConfig, getAvailableStyles } from '../theme/colors';
 import { initDatabase, getDatabase } from '../database/Database';
 
 // 主题切换模式枚举
@@ -39,6 +39,9 @@ export function ThemeProvider({ children }) {
   const [themeMode, setThemeModeState] = useState(ThemeMode.AUTO);
   const [darkStartTime, setDarkStartTime] = useState('21:00'); // 默认深色模式开始时间（21:00）
   const [lightStartTime, setLightStartTime] = useState('07:00'); // 默认浅色模式开始时间（07:00）
+  const [themeStyle, setThemeStyleState] = useState('apple');
+  const [taskBgMode, setTaskBgModeState] = useState('follow');
+  const [taskBgColor, setTaskBgColorState] = useState('#3B82F6');
 
   // 从数据库加载主题设置
   useEffect(() => {
@@ -61,6 +64,12 @@ export function ThemeProvider({ children }) {
         if (row.key === 'theme_mode') setThemeModeState(row.value);
         else if (row.key === 'theme_dark_start') setDarkStartTime(row.value);
         else if (row.key === 'theme_light_start') setLightStartTime(row.value);
+        else if (row.key === 'theme_style') {
+          const validStyles = ['apple', 'microsoft', 'minimal', 'glass'];
+          if (validStyles.includes(row.value)) setThemeStyleState(row.value);
+        }
+        else if (row.key === 'task_bg_mode') setTaskBgModeState(row.value);
+        else if (row.key === 'task_bg_color') setTaskBgColorState(row.value);
       });
     } catch (error) {
       // 首次运行无设置，使用默认值
@@ -110,12 +119,32 @@ export function ThemeProvider({ children }) {
     saveThemeSetting('theme_light_start', time);
   }, []);
 
+  const setThemeStyle = useCallback((styleId) => {
+    setThemeStyleState(styleId);
+    saveThemeSetting('theme_style', styleId);
+  }, []);
+
+  const setTaskBgMode = useCallback((mode) => {
+    setTaskBgModeState(mode);
+    saveThemeSetting('task_bg_mode', mode);
+  }, []);
+
+  const setTaskBgColor = useCallback((color) => {
+    setTaskBgColorState(color);
+    saveThemeSetting('task_bg_color', color);
+  }, []);
+
   /**
    * 计算当前应使用的主题
    */
-  const currentTheme = useMemo(() => {
-    return calculateCurrentTheme(themeMode, systemColorScheme, darkStartTime, lightStartTime);
+  const isDark = useMemo(() => {
+    return calculateThemeMode(themeMode, systemColorScheme, darkStartTime, lightStartTime) === 'dark';
   }, [themeMode, systemColorScheme, darkStartTime, lightStartTime]);
+
+  const currentTheme = useMemo(() => {
+    const mode = calculateThemeMode(themeMode, systemColorScheme, darkStartTime, lightStartTime);
+    return getTheme(themeStyle, mode === 'dark');
+  }, [themeStyle, themeMode, systemColorScheme, darkStartTime, lightStartTime]);
 
   /**
    * 定时模式：每分钟检查一次是否需要切换主题
@@ -137,8 +166,16 @@ export function ThemeProvider({ children }) {
     lightStartTime,
     setDarkStart,
     setLightStart,
-    isDark: currentTheme === DarkTheme,
-  }), [currentTheme, themeMode, setThemeMode, darkStartTime, lightStartTime, setDarkStart, setLightStart]);
+    isDark,
+    themeStyle,
+    setThemeStyle,
+    availableStyles: getAvailableStyles(),
+    taskBgMode,
+    taskBgColor,
+    setTaskBgMode,
+    setTaskBgColor,
+    styleConfig: getStyleConfig(themeStyle),
+  }), [currentTheme, themeMode, setThemeMode, darkStartTime, lightStartTime, setDarkStart, setLightStart, isDark, themeStyle, setThemeStyle, taskBgMode, taskBgColor, setTaskBgMode, setTaskBgColor]);
 
   return (
     <ThemeContext.Provider value={value}>
@@ -150,17 +187,13 @@ export function ThemeProvider({ children }) {
 /**
  * 根据模式和系统设置，计算当前应使用的主题
  */
-function calculateCurrentTheme(mode, systemScheme, darkStart, lightStart) {
+function calculateThemeMode(mode, systemScheme, darkStart, lightStart) {
   switch (mode) {
-    case ThemeMode.LIGHT:
-      return LightTheme;
-    case ThemeMode.DARK:
-      return DarkTheme;
-    case ThemeMode.SCHEDULED:
-      return isTimeForDark(darkStart, lightStart) ? DarkTheme : LightTheme;
-    case ThemeMode.AUTO:
-    default:
-      return systemScheme === 'dark' ? DarkTheme : LightTheme;
+    case 'light': return 'light';
+    case 'dark': return 'dark';
+    case 'scheduled': return isTimeForDark(darkStart, lightStart) ? 'dark' : 'light';
+    case 'auto':
+    default: return systemScheme === 'dark' ? 'dark' : 'light';
   }
 }
 
