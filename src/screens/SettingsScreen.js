@@ -1,8 +1,8 @@
-// 设置页面（v1.2.6完整版）
+// 设置页面（v1.3.0 - 自定义字体版）
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useTheme, ThemeMode, ThemeModeLabels } from '../context/ThemeContext';
-import { useFont, FontStyleLabels, FontFamilyMap, FontStyleMap } from '../context/FontContext';
+import { useFont } from '../context/FontContext';
 import { useTasks } from '../context/TaskContext';
 import { APP_VERSION } from '../utils/constants';
 import { deleteTask } from '../database/TaskTable';
@@ -10,16 +10,14 @@ import { deleteCompletionsByTask } from '../database/CompletionTable';
 import { deleteStepsByTask } from '../database/TaskStepTable';
 import ThemePicker from '../components/ThemePicker';
 import GroupManagementModal from '../components/GroupManagementModal';
-import FontPicker from '../components/FontPicker';
 import ThemedText from '../components/ThemedText';
 
-export default function SettingsScreen() {
+export default function SettingsScreen({ navigation }) {
   const { theme, themeMode, isDark } = useTheme();
-  const { fontStyleLabel } = useFont();
+  const { currentFont } = useFont();
   const { tasks, loadTasks, groups, addGroup, editGroup, removeGroup, loadGroups, resetDemoTasks } = useTasks();
   const [themePickerVisible, setThemePickerVisible] = useState(false);
   const [groupModalVisible, setGroupModalVisible] = useState(false);
-  const [fontPickerVisible, setFontPickerVisible] = useState(false);
   const styles = createStyles(theme);
 
   const handleClearAllTasks = () => {
@@ -45,11 +43,9 @@ export default function SettingsScreen() {
 
   const handleSaveGroups = async (updatedList, deletedId) => {
     try {
-      // Handle deletion
       if (deletedId) {
         await removeGroup(deletedId);
       }
-      // Handle edits and adds
       for (const g of updatedList) {
         if (g.isNew) {
           await addGroup(g.name, g.icon);
@@ -70,40 +66,38 @@ export default function SettingsScreen() {
       <Text style={[styles.sectionTitle, { color: theme.textTertiary }]}>外观</Text>
       <TouchableOpacity style={[styles.settingItem, { backgroundColor: theme.cardBackground }]} onPress={() => setThemePickerVisible(true)}>
         <View style={styles.settingLeft}>
-          <Text style={[styles.settingLabel, { color: theme.textPrimary }]}>主题模式</Text>
-          <Text style={[styles.settingValue, { color: theme.textSecondary }]}>{ThemeModeLabels[themeMode]}</Text>
+          <ThemedText style={[styles.settingLabel, { color: theme.textPrimary }]}>主题模式</ThemedText>
+          <ThemedText style={[styles.settingValue, { color: theme.textSecondary }]}>{ThemeModeLabels[themeMode]}</ThemedText>
         </View>
         <Text style={[styles.settingArrow, { color: theme.textTertiary }]}>›</Text>
       </TouchableOpacity>
       <View style={[styles.settingItem, { backgroundColor: theme.cardBackground }]}>
         <View style={styles.settingLeft}>
-          <Text style={[styles.settingLabel, { color: theme.textPrimary }]}>当前外观</Text>
-          <Text style={[styles.settingValue, { color: theme.textSecondary }]}>{isDark ? '深色模式' : '浅色模式'}</Text>
+          <ThemedText style={[styles.settingLabel, { color: theme.textPrimary }]}>当前外观</ThemedText>
+          <ThemedText style={[styles.settingValue, { color: theme.textSecondary }]}>{isDark ? '深色模式' : '浅色模式'}</ThemedText>
         </View>
         <View style={[styles.themeIndicator, { backgroundColor: isDark ? '#1F2937' : '#FFFFFF', borderColor: theme.separator }]} />
       </View>
 
       {/* 字体选择 */}
       <Text style={[styles.sectionTitle, { color: theme.textTertiary }]}>字体</Text>
-      <View style={[styles.settingItem, { backgroundColor: theme.cardBackground }]}>
+      <TouchableOpacity style={[styles.settingItem, { backgroundColor: theme.cardBackground }]} onPress={() => navigation.navigate('FontPicker')}>
         <View style={styles.settingLeft}>
           <ThemedText style={[styles.settingLabel, { color: theme.textPrimary }]}>字体风格</ThemedText>
-          <ThemedText style={[styles.settingValue, { color: theme.textSecondary }]}>{fontStyleLabel}</ThemedText>
+          <ThemedText style={[styles.settingValue, { color: theme.textSecondary }]}>{currentFont.name}</ThemedText>
         </View>
-        <TouchableOpacity style={[styles.fontSelectBtn, { backgroundColor: theme.primary + '20' }]} onPress={() => setFontPickerVisible(true)}>
-          <ThemedText style={[styles.fontSelectBtnText, { color: theme.primary }]}>选择</ThemedText>
-        </TouchableOpacity>
-      </View>
+        <Text style={[styles.settingArrow, { color: theme.textTertiary }]}>›</Text>
+      </TouchableOpacity>
       <View style={[styles.fontPreview, { backgroundColor: theme.cardBackground, borderColor: theme.separator }]}>
         <ThemedText style={[styles.fontPreviewLabel, { color: theme.textTertiary }]}>当前字体预览</ThemedText>
         <ThemedText style={[styles.fontPreviewText, { color: theme.textPrimary }]}>
-          YuiTodo 任务清单
+          {currentFont.preview}
         </ThemedText>
         <ThemedText style={[styles.fontPreviewSub, { color: theme.textSecondary }]}>
-          今日待办：完成项目报告
+          📝 完成项目报告 · 收集数据、撰写初稿
         </ThemedText>
         <ThemedText style={[styles.fontPreviewSub, { color: theme.textTertiary }]}>
-          The quick brown fox jumps
+          今天 · 已完成 3/5 · 循环任务
         </ThemedText>
       </View>
 
@@ -111,8 +105,8 @@ export default function SettingsScreen() {
       <Text style={[styles.sectionTitle, { color: theme.textTertiary }]}>任务分组</Text>
       <TouchableOpacity style={[styles.settingItem, { backgroundColor: theme.cardBackground }]} onPress={() => setGroupModalVisible(true)}>
         <View style={styles.settingLeft}>
-          <Text style={[styles.settingLabel, { color: theme.textPrimary }]}>管理分组</Text>
-          <Text style={[styles.settingValue, { color: theme.textSecondary }]}>{groups.length} 个分组</Text>
+          <ThemedText style={[styles.settingLabel, { color: theme.textPrimary }]}>管理分组</ThemedText>
+          <ThemedText style={[styles.settingValue, { color: theme.textSecondary }]}>{groups.length} 个分组</ThemedText>
         </View>
         <Text style={[styles.settingArrow, { color: theme.textTertiary }]}>›</Text>
       </TouchableOpacity>
@@ -141,20 +135,20 @@ export default function SettingsScreen() {
       <Text style={[styles.sectionTitle, { color: theme.textTertiary }]}>关于</Text>
       <View style={[styles.settingItem, { backgroundColor: theme.cardBackground }]}>
         <View style={styles.settingLeft}>
-          <Text style={[styles.settingLabel, { color: theme.textPrimary }]}>版本</Text>
-          <Text style={[styles.settingValue, { color: theme.textSecondary }]}>{APP_VERSION}</Text>
+          <ThemedText style={[styles.settingLabel, { color: theme.textPrimary }]}>版本</ThemedText>
+          <ThemedText style={[styles.settingValue, { color: theme.textSecondary }]}>{APP_VERSION}</ThemedText>
         </View>
       </View>
       <View style={[styles.settingItem, { backgroundColor: theme.cardBackground }]}>
         <View style={styles.settingLeft}>
-          <Text style={[styles.settingLabel, { color: theme.textPrimary }]}>适配机型</Text>
-          <Text style={[styles.settingValue, { color: theme.textSecondary }]}>OnePlus Ace 2 Pro / Android 13-14</Text>
+          <ThemedText style={[styles.settingLabel, { color: theme.textPrimary }]}>适配机型</ThemedText>
+          <ThemedText style={[styles.settingValue, { color: theme.textSecondary }]}>OnePlus Ace 2 Pro / Android 13-14</ThemedText>
         </View>
       </View>
       <View style={[styles.settingItem, { backgroundColor: theme.cardBackground }]}>
         <View style={styles.settingLeft}>
-          <Text style={[styles.settingLabel, { color: theme.textPrimary }]}>数据存储</Text>
-          <Text style={[styles.settingValue, { color: theme.textSecondary }]}>纯本地SQLite，无网络请求</Text>
+          <ThemedText style={[styles.settingLabel, { color: theme.textPrimary }]}>数据存储</ThemedText>
+          <ThemedText style={[styles.settingValue, { color: theme.textSecondary }]}>纯本地SQLite，无网络请求</ThemedText>
         </View>
       </View>
       <View style={{ height: 40 }} />
@@ -165,7 +159,6 @@ export default function SettingsScreen() {
         onClose={() => setGroupModalVisible(false)}
         onSave={handleSaveGroups}
       />
-      <FontPicker visible={fontPickerVisible} onClose={() => setFontPickerVisible(false)} />
     </ScrollView>
   );
 }
@@ -185,7 +178,5 @@ function createStyles(theme) {
     fontPreviewLabel: { fontSize: 11, fontWeight: '600', marginBottom: 8, textTransform: 'uppercase' },
     fontPreviewText: { fontSize: 18, marginBottom: 6 },
     fontPreviewSub: { fontSize: 14, marginBottom: 3 },
-    fontSelectBtn: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 8 },
-    fontSelectBtnText: { fontSize: 13, fontWeight: '600' },
   });
 }

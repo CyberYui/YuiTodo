@@ -1,43 +1,14 @@
 // 字体全局状态管理
-// 职责：管理应用字体风格的切换和持久化
+// 职责：管理应用字体风格的切换、持久化、加载
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { initDatabase, getDatabase } from '../database/Database';
-
-export const FontStyle = {
-  DEFAULT: 'default',
-  ROUNDED: 'rounded',
-  HARD: 'hard',
-  ELEGANT: 'elegant',
-};
-
-export const FontStyleLabels = {
-  [FontStyle.DEFAULT]: '系统默认',
-  [FontStyle.ROUNDED]: '圆润可爱',
-  [FontStyle.HARD]: '硬朗简洁',
-  [FontStyle.ELEGANT]: '优雅文艺',
-};
-
-// Android系统字体映射（视觉差异明显的字体）
-export const FontFamilyMap = {
-  [FontStyle.DEFAULT]: 'sans-serif',
-  [FontStyle.ROUNDED]: 'sans-serif-light',
-  [FontStyle.HARD]: 'monospace',
-  [FontStyle.ELEGANT]: 'serif',
-};
-
-// 字体样式（用于增强视觉差异）
-export const FontStyleMap = {
-  [FontStyle.DEFAULT]: { fontWeight: 'normal', fontStyle: 'normal' },
-  [FontStyle.ROUNDED]: { fontWeight: '300', fontStyle: 'normal' },
-  [FontStyle.HARD]: { fontWeight: 'bold', fontStyle: 'normal' },
-  [FontStyle.ELEGANT]: { fontWeight: 'normal', fontStyle: 'italic' },
-};
+import { FONT_LIST, getFontConfig } from '../theme/fonts';
 
 const FontContext = createContext();
 
 export function FontProvider({ children }) {
-  const [fontStyle, setFontStyleState] = useState(FontStyle.DEFAULT);
+  const [fontId, setFontIdState] = useState('default');
 
   useEffect(() => {
     loadFontSetting();
@@ -52,24 +23,29 @@ export function FontProvider({ children }) {
         true
       );
       if (result[0].rows.length > 0) {
-        setFontStyleState(result[0].rows[0].value);
+        const savedId = result[0].rows[0].value;
+        // 验证字体ID是否有效
+        const fontConfig = FONT_LIST.find((f) => f.id === savedId);
+        if (fontConfig) {
+          setFontIdState(savedId);
+        }
       }
     } catch (e) {
       // 首次运行使用默认值
     }
   }
 
-  const setFontStyle = useCallback((style) => {
-    setFontStyleState(style);
-    saveFontSetting(style);
+  const setFontId = useCallback((id) => {
+    setFontIdState(id);
+    saveFontSetting(id);
   }, []);
 
-  async function saveFontSetting(style) {
+  async function saveFontSetting(id) {
     try {
       await initDatabase();
       const db = getDatabase();
       await db.execAsync(
-        [{ sql: "INSERT OR REPLACE INTO app_setting (key, value) VALUES ('font_style', ?)", args: [style] }],
+        [{ sql: "INSERT OR REPLACE INTO app_setting (key, value) VALUES ('font_style', ?)", args: [id] }],
         false
       );
     } catch (e) {
@@ -77,14 +53,14 @@ export function FontProvider({ children }) {
     }
   }
 
-  const fontFamily = FontFamilyMap[fontStyle] || 'sans-serif';
+  const currentFont = useMemo(() => getFontConfig(fontId), [fontId]);
 
   const value = useMemo(() => ({
-    fontStyle,
-    setFontStyle,
-    fontFamily,
-    fontStyleLabel: FontStyleLabels[fontStyle] || '系统默认',
-  }), [fontStyle, setFontStyle, fontFamily]);
+    fontId,
+    setFontId,
+    currentFont,
+    fontList: FONT_LIST,
+  }), [fontId, setFontId, currentFont]);
 
   return (
     <FontContext.Provider value={value}>
