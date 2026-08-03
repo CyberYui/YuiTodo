@@ -1,7 +1,4 @@
 // App根组件：导航容器 + 全局状态提供者
-// 应用启动时第一个被渲染的组件
-// 职责：1. 包裹全局Provider  2. 配置导航栈  3. 定义页面路由
-
 import React, { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
@@ -85,46 +82,14 @@ function AppContent() {
           headerShadowVisible: false,
         }}
       >
-        <Stack.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{ title: '' }}
-        />
-        <Stack.Screen
-          name="Statistics"
-          component={StatisticsScreen}
-          options={{ title: '数据统计' }}
-        />
-        <Stack.Screen
-          name="Settings"
-          component={SettingsScreen}
-          options={{ title: '设置' }}
-        />
-        <Stack.Screen
-          name="FontPicker"
-          component={FontPickerScreen}
-          options={{ title: '选择字体' }}
-        />
-        <Stack.Screen
-          name="BackgroundSettings"
-          component={BackgroundSettingsScreen}
-          options={{ title: '背景图片' }}
-        />
-        <Stack.Screen
-          name="ReminderSettings"
-          component={ReminderSettingsScreen}
-          options={{ title: '每日提醒' }}
-        />
-        <Stack.Screen
-          name="IconPicker"
-          component={IconPickerScreen}
-          options={{ title: '应用图标' }}
-        />
-        <Stack.Screen
-          name="RecycleBin"
-          component={RecycleBinScreen}
-          options={{ title: '回收站' }}
-        />
+        <Stack.Screen name="Home" component={HomeScreen} options={{ title: '' }} />
+        <Stack.Screen name="Statistics" component={StatisticsScreen} options={{ title: '数据统计' }} />
+        <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: '设置' }} />
+        <Stack.Screen name="FontPicker" component={FontPickerScreen} options={{ title: '选择字体' }} />
+        <Stack.Screen name="BackgroundSettings" component={BackgroundSettingsScreen} options={{ title: '背景图片' }} />
+        <Stack.Screen name="ReminderSettings" component={ReminderSettingsScreen} options={{ title: '每日提醒' }} />
+        <Stack.Screen name="IconPicker" component={IconPickerScreen} options={{ title: '应用图标' }} />
+        <Stack.Screen name="RecycleBin" component={RecycleBinScreen} options={{ title: '回收站' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -132,26 +97,18 @@ function AppContent() {
 
 export default function App() {
   return (
-    // 手势处理根容器：必须包裹所有使用手势的组件
     <GestureHandlerRootView style={{ flex: 1 }}>
-      {/* 安全区域Provider：处理刘海屏/圆角屏的边距 */}
       <SafeAreaProvider>
-        {/* 主题Provider：提供日/夜间主题色 */}
         <ThemeProvider>
-          {/* 字体Provider：提供全局字体设置 */}
           <FontProvider>
-            {/* 背景图片Provider：管理背景图片状态 */}
             <BackgroundProvider>
-              {/* 提醒Provider：管理每日提醒设置 */}
               <ReminderProvider>
-                {/* 任务数据Provider：提供任务列表和操作函数 */}
                 <TaskProvider>
-                  {/* 列表数据Provider */}
                   <ListProvider>
-                     <DragSortProvider>
-                       <AppContent />
-                     </DragSortProvider>
-                   </ListProvider>
+                    <DragSortProvider>
+                      <AppContent />
+                    </DragSortProvider>
+                  </ListProvider>
                 </TaskProvider>
               </ReminderProvider>
             </BackgroundProvider>
