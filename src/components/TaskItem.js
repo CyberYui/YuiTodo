@@ -255,7 +255,7 @@ export default function TaskItem({
           </View>
         </View>
 
-        {/* 右侧：星标 + 循环暂停指示 */}
+        {/* 右上：星标 + 循环暂停指示 */}
         <View style={styles.rightIndicator}>
           {onToggleStar && (
             <TouchableOpacity onPress={() => onToggleStar(task.id)} style={styles.starButton}>
@@ -310,9 +310,9 @@ function createStyles(theme) {
     recurrenceText: { fontSize: 11, fontWeight: '500' },
     statusBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
     statusText: { fontSize: 11, fontWeight: '500' },
-    rightIndicator: { justifyContent: 'center', paddingRight: 12, gap: 4 },
-    starButton: { padding: 2 },
-    starText: { fontSize: 16 },
+    rightIndicator: { justifyContent: 'flex-start', alignItems: 'flex-start', paddingRight: 12, paddingTop: 10, gap: 4 },
+    starButton: { padding: 4 },
+    starText: { fontSize: 20 },
     pausedText: { fontSize: 14 },
     leftAction: { flex: 1, justifyContent: 'center', alignItems: 'flex-end', paddingRight: 20, marginVertical: 4, borderRadius: 10 },
     rightAction: { flex: 1, justifyContent: 'center', alignItems: 'flex-start', paddingLeft: 20, marginVertical: 4, borderRadius: 10 },
