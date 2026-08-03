@@ -12,8 +12,10 @@ import ErrorBoundary from '../components/ErrorBoundary';
 import ThemedText from '../components/ThemedText';
 
 export default function HomeScreen({ navigation }) {
-  const { theme, styleConfig } = useTheme();
-  const { imageUri, opacity, hasBackground } = useBackground();
+  const { theme, styleConfig, isDark } = useTheme();
+  const { getCurrentImage, getCurrentOpacity, hasBackground } = useBackground();
+  const imageUri = getCurrentImage(isDark);
+  const opacity = getCurrentOpacity(isDark);
   const { tasks, isLoading, groups, currentGroupId, setCurrentGroupId, completeTask, removeTask, toggleStep, toggleStar } = useTasks();
   const [editorVisible, setEditorVisible] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
