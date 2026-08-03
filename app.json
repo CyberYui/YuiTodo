@@ -24,6 +24,19 @@
       },
       "package": "com.yuitodo.app"
     },
-    "plugins": []
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "允许 YuiTodo 访问您的相册以选择背景图片"
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#3B82F6"
+        }
+      ]
+    ]
   }
 }
