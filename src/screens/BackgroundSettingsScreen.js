@@ -1,8 +1,8 @@
 // 背景设置页面
-// 职责：选图、预览、透明度调节
+// 职责：选图、预览、透明度调节、权限提示
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ImageBackground, Dimensions, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ImageBackground, Dimensions, Linking } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { useTheme } from '../context/ThemeContext';
 import { useBackground } from '../context/BackgroundContext';
@@ -12,22 +12,41 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function BackgroundSettingsScreen({ navigation }) {
   const { theme } = useTheme();
-  const { lightImageUri, darkImageUri, lightOpacity, darkOpacity, hasBackground, selectImage, setOpacity, removeBackground } = useBackground();
+  const { lightImageUri, darkImageUri, lightOpacity, darkOpacity, hasBackground, selectImage, setOpacity, removeBackground, permissionStatus, requestPermission } = useBackground();
   const [activeMode, setActiveMode] = useState('light');
   const styles = createStyles(theme);
 
   const currentImage = activeMode === 'light' ? lightImageUri : darkImageUri;
   const currentOpacity = activeMode === 'light' ? lightOpacity : darkOpacity;
 
-  const handleRemove = () => {
-    Alert.alert('移除背景', '确定要移除当前背景图片吗？', [
-      { text: '取消', style: 'cancel' },
-      { text: '移除', style: 'destructive', onPress: removeBackground },
-    ]);
+  const handleSelectImage = () => {
+    if (permissionStatus === 'denied') {
+      Linking.openSettings();
+      return;
+    }
+    selectImage(activeMode);
   };
+
+  const handleRemove = () => {
+    removeBackground();
+  };
+
+  const isPermissionDenied = permissionStatus === 'denied';
 
   return (
     <View style={styles.container}>
+      {/* 权限提示 */}
+      {isPermissionDenied && (
+        <View style={styles.permissionBanner}>
+          <ThemedText style={[styles.permissionText, { color: theme.danger }]}>
+            ⚠ 相册权限被拒绝，无法选择图片。
+          </ThemedText>
+          <TouchableOpacity onPress={() => Linking.openSettings()} style={[styles.permissionButton, { borderColor: theme.danger }]}>
+            <ThemedText style={[styles.permissionButtonText, { color: theme.danger }]}>去系统设置开启</ThemedText>
+          </TouchableOpacity>
+        </View>
+      )}
+
       <View style={styles.tabBar}>
         <TouchableOpacity
           style={[styles.tab, activeMode === 'light' && styles.tabActive, { borderColor: theme.separator }]}
@@ -67,9 +86,12 @@ export default function BackgroundSettingsScreen({ navigation }) {
       </View>
 
       <View style={styles.buttonSection}>
-        <TouchableOpacity style={[styles.button, { backgroundColor: theme.primary }]} onPress={() => selectImage(activeMode)}>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: isPermissionDenied ? theme.textTertiary : theme.primary }]}
+          onPress={handleSelectImage}
+        >
           <ThemedText style={styles.buttonText}>
-            {hasBackground ? '更换图片' : '选择图片'}
+            {isPermissionDenied ? '开启相册权限' : (hasBackground ? '更换图片' : '选择图片')}
           </ThemedText>
         </TouchableOpacity>
         {hasBackground && (
@@ -111,7 +133,27 @@ export default function BackgroundSettingsScreen({ navigation }) {
 function createStyles(theme) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: theme.background },
-    tabBar: { flexDirection: 'row', marginHorizontal: 16, marginTop: 16, marginBottom: 8, backgroundColor: theme.separator + '40', borderRadius: 8, padding: 3 },
+    permissionBanner: {
+      marginHorizontal: 16,
+      marginTop: 16,
+      marginBottom: 8,
+      padding: 12,
+      borderRadius: 10,
+      backgroundColor: theme.danger + '15',
+      borderWidth: 1,
+      borderColor: theme.danger + '40',
+      gap: 8,
+    },
+    permissionText: { fontSize: 13, fontWeight: '500' },
+    permissionButton: {
+      alignSelf: 'flex-start',
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 6,
+      borderWidth: 1,
+    },
+    permissionButtonText: { fontSize: 13, fontWeight: '600' },
+    tabBar: { flexDirection: 'row', marginHorizontal: 16, marginTop: 8, marginBottom: 8, backgroundColor: theme.separator + '40', borderRadius: 8, padding: 3 },
     tab: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 6 },
     tabActive: { backgroundColor: theme.cardBackground },
     tabText: { fontSize: 14, fontWeight: '500' },

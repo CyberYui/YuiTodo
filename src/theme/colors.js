@@ -1,10 +1,9 @@
 // 主题风格定义：4种精选风格 × 深浅变体
-// 每种风格包含完整配色 + 样式属性（圆角、阴影、任务背景等）
+// 每种风格包含完整配色 + 样式属性（圆角、阴影等）
 //
 // 设计原则：
-// - 任务背景使用极淡的主题色融合，而非边框式色块
-// - 深浅变体在对比度、饱和度上独立调校
-// - 圆角/阴影/间距符合各风格的设计语言
+// 所有风格统一使用白色卡片 + 左侧彩色细条（任务颜色指示）
+// 不依赖彩色背景融合，避免"边框感"
 
 export const THEME_STYLES = {
   // ─── Sorted 风格：极简、留白、彩色左条 ───
@@ -58,8 +57,7 @@ export const THEME_STYLES = {
       shadowRadius: 4,
       elevation: 1,
     },
-    taskBgAlpha: 0.06,
-    taskBgStyle: 'tint',
+    leftBarWidth: 3,
   },
 
   // ─── Apple 风格：大圆角、优雅阴影、SF 设计语言 ───
@@ -113,8 +111,7 @@ export const THEME_STYLES = {
       shadowRadius: 12,
       elevation: 3,
     },
-    taskBgAlpha: 0.05,
-    taskBgStyle: 'shadow',
+    leftBarWidth: 0,
   },
 
   // ─── Microsoft To Do 风格：清爽卡片、紫色强调 ───
@@ -168,8 +165,7 @@ export const THEME_STYLES = {
       shadowRadius: 6,
       elevation: 2,
     },
-    taskBgAlpha: 0.07,
-    taskBgStyle: 'tint',
+    leftBarWidth: 3,
     cardBorderWidth: 1,
     cardBorderColor: '#EBEBEB',
   },
@@ -181,7 +177,7 @@ export const THEME_STYLES = {
     icon: '🔮',
     light: {
       background: '#F0F4FF',
-      cardBackground: 'rgba(255,255,255,0.75)',
+      cardBackground: '#FFFFFF',
       separator: 'rgba(0,0,0,0.06)',
       textPrimary: '#1A1A2E',
       textSecondary: '#555577',
@@ -200,7 +196,7 @@ export const THEME_STYLES = {
     },
     dark: {
       background: '#0F0F23',
-      cardBackground: 'rgba(255,255,255,0.08)',
+      cardBackground: 'rgba(255,255,255,0.1)',
       separator: 'rgba(255,255,255,0.08)',
       textPrimary: '#F8FAFC',
       textSecondary: '#94A3B8',
@@ -225,9 +221,7 @@ export const THEME_STYLES = {
       shadowRadius: 16,
       elevation: 4,
     },
-    taskBgAlpha: 0.08,
-    taskBgStyle: 'tint',
-    useBlur: true,
+    leftBarWidth: 3,
   },
 };
 
@@ -246,8 +240,7 @@ export function getStyleConfig(themeStyleId) {
     borderWidth: style.cardBorderWidth || 0,
     borderColor: style.cardBorderColor,
     useBlur: style.useBlur || false,
-    taskBgAlpha: style.taskBgAlpha || 0.06,
-    taskBgStyle: style.taskBgStyle || 'tint',
+    leftBarWidth: style.leftBarWidth || 0,
   };
 }
 

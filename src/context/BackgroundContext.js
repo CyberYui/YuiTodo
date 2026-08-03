@@ -1,8 +1,8 @@
 // 背景图片全局状态管理
-// 职责：管理任务列表背景图片的选择、压缩、透明度、持久化
+// 职责：管理任务列表背景图片的选择、压缩、透明度、持久化、权限
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Linking } from 'react-native';
 import { initDatabase, getDatabase } from '../database/Database';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
@@ -18,9 +18,11 @@ export function BackgroundProvider({ children }) {
   const [lightOpacity, setLightOpacityState] = useState(0.6);
   const [darkOpacity, setDarkOpacityState] = useState(0.6);
   const [isLoading, setIsLoading] = useState(true);
+  const [permissionStatus, setPermissionStatus] = useState('undetermined');
 
   useEffect(() => {
     loadSettings();
+    checkPermission();
   }, []);
 
   async function loadSettings() {
@@ -63,11 +65,43 @@ export function BackgroundProvider({ children }) {
     }
   }
 
+  // 检查当前相册权限状态
+  async function checkPermission() {
+    const { status } = await ImagePicker.getMediaLibraryPermissionsAsync();
+    setPermissionStatus(status);
+  }
+
+  // 请求相册权限（如果被永久拒绝则跳转系统设置）
+  const requestPermission = useCallback(async () => {
+    const { status, canAskAgain } = await ImagePicker.getMediaLibraryPermissionsAsync();
+
+    if (status === 'granted') {
+      setPermissionStatus('granted');
+      return true;
+    }
+
+    if (!canAskAgain) {
+      Alert.alert(
+        '需要相册权限',
+        '相册权限已被永久拒绝，请在系统设置中手动开启',
+        [
+          { text: '取消', style: 'cancel' },
+          { text: '去设置', onPress: () => Linking.openSettings() },
+        ]
+      );
+      return false;
+    }
+
+    const result = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    setPermissionStatus(result.status);
+    return result.status === 'granted';
+  }, []);
+
   const selectImage = useCallback(async (mode = 'light') => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const { status } = await ImagePicker.getMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('需要权限', '请允许访问相册以选择背景图片');
-      return;
+      const granted = await requestPermission();
+      if (!granted) return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -107,7 +141,7 @@ export function BackgroundProvider({ children }) {
       setDarkImageUri(destUri);
       await saveSetting('bg_dark_image_uri', destUri);
     }
-  }, [lightImageUri, darkImageUri]);
+  }, [lightImageUri, darkImageUri, requestPermission]);
 
   const setOpacity = useCallback((value, mode = 'light') => {
     if (mode === 'light') {
@@ -146,10 +180,12 @@ export function BackgroundProvider({ children }) {
     opacity: lightOpacity,
     hasBackground,
     isLoading,
+    permissionStatus,
+    requestPermission,
     selectImage,
     setOpacity,
     removeBackground,
-  }), [lightImageUri, darkImageUri, lightOpacity, darkOpacity, hasBackground, isLoading, selectImage, setOpacity, removeBackground]);
+  }), [lightImageUri, darkImageUri, lightOpacity, darkOpacity, hasBackground, isLoading, permissionStatus, requestPermission, selectImage, setOpacity, removeBackground]);
 
   return (
     <BackgroundContext.Provider value={value}>

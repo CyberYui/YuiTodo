@@ -34,53 +34,29 @@ export default function TaskItem({
   onToggleStep,
   onToggleStar,
 }) {
-  const { theme, taskBgMode, taskBgColor, styleConfig, isDark } = useTheme();
+  const { theme, styleConfig, isDark } = useTheme();
   const swipeableRef = useRef(null);
 
-  // 动态样式
   const styles = createStyles(theme);
 
-  // 任务状态判断
   const isDone = task.status === TaskStatus.DONE;
   const isOverdue = isExpired(task.end_time) && task.status === TaskStatus.PENDING;
   const isToday = isDateToday(task.start_time);
 
-  // 步骤进度计算
   const steps = task.steps || [];
   const totalSteps = steps.length;
   const completedSteps = steps.filter((s) => s.status === 'completed').length;
   const hasSteps = totalSteps > 0;
   const allStepsCompleted = hasSteps && completedSteps === totalSteps;
 
-  // 任务自定义颜色主题（从预设中查找，找不到则使用默认蓝色）
   const taskTheme = TASK_COLORS.find((c) => c.bar === task.color) || TASK_COLORS[0];
   const taskColor = taskTheme.bar;
   const labelColor = taskTheme.label;
   const dateColor = taskTheme.date;
   const bgColor = taskTheme.bg;
 
-  function getCardBackground() {
-    const alpha = styleConfig?.taskBgAlpha || 0.06;
-    if (taskBgMode === 'uniform') {
-      return hexToRgba(taskBgColor, alpha);
-    }
-    // follow mode: subtle task theme tint
-    return hexToRgba(taskColor, alpha);
-  }
+  const leftBarWidth = styleConfig?.leftBarWidth || 0;
 
-  function hexToRgba(hex, alpha) {
-    if (!hex || typeof hex !== 'string' || !hex.startsWith('#')) {
-      return `rgba(59,130,246,${alpha})`;
-    }
-    const r = parseInt(hex.slice(1, 3), 16) || 0;
-    const g = parseInt(hex.slice(3, 5), 16) || 0;
-    const b = parseInt(hex.slice(5, 7), 16) || 0;
-    return `rgba(${r},${g},${b},${alpha})`;
-  }
-
-  /**
-   * 渲染左滑操作：删除
-   */
   const renderLeftActions = () => (
     <View style={[styles.leftAction, { backgroundColor: theme.swipeDeleteBg, borderRadius: styleConfig?.cardRadius || 10 }]}>
       <Text style={[styles.actionIcon, { color: theme.danger }]}>🗑</Text>
@@ -88,9 +64,6 @@ export default function TaskItem({
     </View>
   );
 
-  /**
-   * 渲染右滑操作：完成
-   */
   const renderRightActions = () => {
     let actionText = '完成';
     let actionIcon = '✓';
@@ -106,9 +79,6 @@ export default function TaskItem({
     );
   };
 
-  /**
-   * 滑动回调
-   */
   const onSwipeableOpen = (direction) => {
     if (direction === 'left') {
       onSwipeDelete();
@@ -118,18 +88,12 @@ export default function TaskItem({
     setTimeout(() => swipeableRef.current?.close(), 50);
   };
 
-  /**
-   * 点击步骤行：切换步骤状态
-   */
   const handleStepPress = (stepId) => {
     if (onToggleStep) {
       onToggleStep(task.id, stepId);
     }
   };
 
-  /**
-   * 获取状态标签
-   */
   function getStatusLabel() {
     if (isDone) return '已完成';
     if (isOverdue) return '已逾期';
@@ -137,9 +101,6 @@ export default function TaskItem({
     return '';
   }
 
-  /**
-   * 获取循环标签
-   */
   function getRecurrenceLabel() {
     if (!task.recurrenceRule) return null;
     const rule = task.recurrenceRule;
@@ -166,7 +127,7 @@ export default function TaskItem({
         style={[
           styles.card,
           {
-            backgroundColor: styleConfig?.taskBgStyle === 'shadow' ? theme.cardBackground : getCardBackground(),
+            backgroundColor: theme.cardBackground,
             opacity: isDone ? 0.6 : 1,
             borderRadius: styleConfig?.cardRadius || 10,
             ...(styleConfig?.shadowStyle || {}),
@@ -177,12 +138,13 @@ export default function TaskItem({
         activeOpacity={0.8}
         delayLongPress={400}
       >
-        {/* 左侧状态指示条（使用任务自定义颜色） */}
-        <View style={[styles.statusBar, { backgroundColor: isDone ? theme.done : taskColor }]} />
+        {/* 左侧彩色细条（颜色指示器，部分风格可能为 0） */}
+        {leftBarWidth > 0 && (
+          <View style={[styles.leftBar, { backgroundColor: isDone ? theme.done : taskColor, width: leftBarWidth }]} />
+        )}
 
         {/* 任务内容 */}
         <View style={styles.content}>
-          {/* 标题行 */}
           <ThemedText
             style={[styles.title, { color: theme.textPrimary, textDecorationLine: isDone ? 'line-through' : 'none' }]}
             numberOfLines={1}
@@ -190,14 +152,12 @@ export default function TaskItem({
             {task.title}
           </ThemedText>
 
-          {/* 备注 */}
           {task.note ? (
             <ThemedText style={[styles.note, { color: theme.textSecondary }]} numberOfLines={1}>
               {task.note}
             </ThemedText>
           ) : null}
 
-          {/* 步骤列表（可交互） */}
           {hasSteps && (
             <View style={styles.stepsContainer}>
               {steps.map((step, index) => {
@@ -234,13 +194,11 @@ export default function TaskItem({
             </View>
           )}
 
-          {/* 底部信息行 */}
           <View style={styles.metaRow}>
             <ThemedText style={[styles.timeText, { color: isOverdue ? theme.danger : theme.textTertiary }]}>
               {formatDateFriendly(task.start_time)}
             </ThemedText>
 
-            {/* 循环标签（使用主题循环标签色） */}
             {getRecurrenceLabel() ? (
               <View style={[styles.recurrenceBadge, { backgroundColor: bgColor }]}>
                 <ThemedText style={[styles.recurrenceText, { color: labelColor }]}>
@@ -249,7 +207,6 @@ export default function TaskItem({
               </View>
             ) : null}
 
-            {/* 步骤进度标签 */}
             {hasSteps && (
               <View style={[styles.recurrenceBadge, { backgroundColor: bgColor }]}>
                 <ThemedText style={[styles.recurrenceText, { color: taskColor }]}>
@@ -258,7 +215,6 @@ export default function TaskItem({
               </View>
             )}
 
-            {/* 状态标签 */}
             {getStatusLabel() ? (
               <View style={[styles.statusBadge, { backgroundColor: (isOverdue ? theme.danger : taskColor) + '20' }]}>
                 <ThemedText style={[styles.statusText, { color: isOverdue ? theme.danger : taskColor }]}>
@@ -301,11 +257,12 @@ function createStyles(theme) {
       elevation: 2,
       overflow: 'hidden',
     },
-    statusBar: { width: 4 },
+    leftBar: {
+      alignSelf: 'stretch',
+    },
     content: { flex: 1, paddingVertical: 12, paddingHorizontal: 14 },
     title: { fontSize: 16, fontWeight: '500', marginBottom: 2 },
     note: { fontSize: 13, marginBottom: 6 },
-    // 步骤列表
     stepsContainer: { marginBottom: 6, gap: 2 },
     stepRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 3, paddingLeft: 12, gap: 8 },
     stepCheckbox: {

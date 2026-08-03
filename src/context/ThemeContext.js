@@ -40,8 +40,6 @@ export function ThemeProvider({ children }) {
   const [darkStartTime, setDarkStartTime] = useState('21:00'); // 默认深色模式开始时间（21:00）
   const [lightStartTime, setLightStartTime] = useState('07:00'); // 默认浅色模式开始时间（07:00）
   const [themeStyle, setThemeStyleState] = useState('sorted');
-  const [taskBgMode, setTaskBgModeState] = useState('follow');
-  const [taskBgColor, setTaskBgColorState] = useState('#3B82F6');
 
   // 从数据库加载主题设置
   useEffect(() => {
@@ -68,8 +66,7 @@ export function ThemeProvider({ children }) {
           const validStyles = ['sorted', 'apple', 'microsoft', 'glass'];
           if (validStyles.includes(row.value)) setThemeStyleState(row.value);
         }
-        else if (row.key === 'task_bg_mode') setTaskBgModeState(row.value);
-        else if (row.key === 'task_bg_color') setTaskBgColorState(row.value);
+
       });
     } catch (error) {
       // 首次运行无设置，使用默认值
@@ -124,16 +121,6 @@ export function ThemeProvider({ children }) {
     saveThemeSetting('theme_style', styleId);
   }, []);
 
-  const setTaskBgMode = useCallback((mode) => {
-    setTaskBgModeState(mode);
-    saveThemeSetting('task_bg_mode', mode);
-  }, []);
-
-  const setTaskBgColor = useCallback((color) => {
-    setTaskBgColorState(color);
-    saveThemeSetting('task_bg_color', color);
-  }, []);
-
   /**
    * 计算当前应使用的主题
    */
@@ -170,12 +157,8 @@ export function ThemeProvider({ children }) {
     themeStyle,
     setThemeStyle,
     availableStyles: getAvailableStyles(),
-    taskBgMode,
-    taskBgColor,
-    setTaskBgMode,
-    setTaskBgColor,
     styleConfig: getStyleConfig(themeStyle),
-  }), [currentTheme, themeMode, setThemeMode, darkStartTime, lightStartTime, setDarkStart, setLightStart, isDark, themeStyle, setThemeStyle, taskBgMode, taskBgColor, setTaskBgMode, setTaskBgColor]);
+  }), [currentTheme, themeMode, setThemeMode, darkStartTime, lightStartTime, setDarkStart, setLightStart, isDark, themeStyle, setThemeStyle]);
 
   return (
     <ThemeContext.Provider value={value}>
