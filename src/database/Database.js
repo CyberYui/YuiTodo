@@ -4,7 +4,7 @@
 import { openDatabase } from 'expo-sqlite/legacy';
 
 const DATABASE_NAME = 'yuitodo.db';
-const CURRENT_DB_VERSION = 3;
+const CURRENT_DB_VERSION = 4;
 
 let databaseInstance = null;
 let initPromise = null;
@@ -130,6 +130,10 @@ async function migrateSchema(db) {
       try { await db.execAsync([{ sql: 'ALTER TABLE task ADD COLUMN is_starred INTEGER DEFAULT 0', args: [] }], false); } catch (e) {}
       try { await db.execAsync([{ sql: 'ALTER TABLE task ADD COLUMN group_id INTEGER DEFAULT 0', args: [] }], false); } catch (e) {}
       try { await db.execAsync([{ sql: 'UPDATE task SET start_date = start_time WHERE start_date IS NULL', args: [] }], false); } catch (e) {}
+    }
+
+    if (currentVersion < 4) {
+      try { await db.execAsync([{ sql: 'ALTER TABLE task ADD COLUMN reminder_time TEXT', args: [] }], false); } catch (e) {}
     }
 
     await db.execAsync(
