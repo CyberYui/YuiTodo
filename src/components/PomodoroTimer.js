@@ -1,8 +1,9 @@
-// 番茄钟组件
+// 番茄钟组件 v1.7.0
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import ThemedText from './ThemedText';
+import Icon from './Icon';
 
 const WORK_TIME = 25 * 60;
 const BREAK_TIME = 5 * 60;
@@ -43,7 +44,10 @@ export default function PomodoroTimer({ visible, onClose, taskTitle }) {
     <Modal visible={visible} animationType="slide" onRequestClose={onClose} transparent>
       <View style={styles.overlay}>
         <View style={[styles.container, { backgroundColor: theme.cardBackground }]}>
-          <Text style={[styles.title, { color: theme.textPrimary }]}>{isBreak ? '☕ 休息时间' : '🍅 专注中'}</Text>
+          <View style={styles.titleRow}>
+            <Icon name={isBreak ? 'timerSand' : 'tomato'} size={20} color={theme.primary} />
+            <ThemedText style={[styles.title, { color: theme.textPrimary }]}>{isBreak ? '休息时间' : '专注中'}</ThemedText>
+          </View>
           {taskTitle && <ThemedText style={[styles.taskName, { color: theme.textSecondary }]} numberOfLines={1}>{taskTitle}</ThemedText>}
 
           <View style={styles.timerCircle}>
@@ -76,7 +80,8 @@ function createStyles(theme) {
   return StyleSheet.create({
     overlay: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
     container: { width: '85%', borderRadius: 20, padding: 32, alignItems: 'center', elevation: 10 },
-    title: { fontSize: 22, fontWeight: '700', marginBottom: 8 },
+    title: { fontSize: 22, fontWeight: '700' },
+    titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
     taskName: { fontSize: 14, marginBottom: 24 },
     timerCircle: { alignItems: 'center', marginBottom: 20 },
     timeText: { fontSize: 56, fontWeight: '200', marginBottom: 16 },

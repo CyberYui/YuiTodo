@@ -1,4 +1,4 @@
-// 主题风格选择器（8种风格）
+// 主题风格选择器（10种风格）
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView, Dimensions } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
@@ -40,20 +40,20 @@ export default function ThemeStylePicker({ visible, onClose }) {
                 ]}
                 onPress={() => handleSelect(style.id)}
               >
-                <View style={[styles.preview, { backgroundColor: lightColors.background }]}>
-                  <View style={[styles.previewCard, { backgroundColor: lightColors.cardBackground, borderRadius: styleConfig.cardRadius }]}>
-                    {styleConfig.leftBarWidth > 0 && (
-                      <View style={[styles.previewBar, { backgroundColor: lightColors.primary, width: styleConfig.leftBarWidth }]} />
+                <View style={[styles.preview, { backgroundColor: lightColors.bg }]}>
+                  <View style={[styles.previewCard, { backgroundColor: lightColors.card, borderRadius: styleConfig.cardRadius }]}>
+                    {styleConfig.leftBar && (
+                      <View style={[styles.previewBar, { backgroundColor: lightColors.primary, width: 4 }]} />
                     )}
                     <View style={{ flex: 1 }}>
-                      <ThemedText style={[styles.previewText, { color: lightColors.textPrimary }]}>示例任务</ThemedText>
-                      <ThemedText style={[styles.previewSub, { color: lightColors.textTertiary }]}>今天</ThemedText>
+                      <View style={[styles.previewTitle, { backgroundColor: lightColors.text, height: 6, borderRadius: 2, marginBottom: 4 }]} />
+                      <View style={[styles.previewSub, { backgroundColor: lightColors.sub, height: 4, borderRadius: 2, width: '60%' }]} />
                     </View>
                   </View>
                 </View>
                 <View style={styles.cardFooter}>
-                  <ThemedText style={[styles.cardName, { color: theme.textPrimary }]}>{style.icon} {style.name}</ThemedText>
-                  {isSelected && <Text style={{ color: theme.primary, fontSize: 16 }}>✓</Text>}
+                  <ThemedText style={[styles.cardName, { color: theme.textPrimary }]}>{style.name}</ThemedText>
+                  {isSelected && <Text style={{ color: theme.primary, fontSize: 14 }}>✓</Text>}
                 </View>
               </TouchableOpacity>
             );
@@ -71,11 +71,11 @@ const styles = StyleSheet.create({
   closeBtn: { fontSize: 16, fontWeight: '600' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', padding: 16, gap: 12 },
   card: { width: CARD_WIDTH, borderRadius: 12, borderWidth: 1, overflow: 'hidden' },
-  preview: { height: 100, padding: 8 },
+  preview: { height: 80, padding: 8 },
   previewCard: { flex: 1, padding: 6, flexDirection: 'row', alignItems: 'center', gap: 6 },
   previewBar: { height: '100%', borderRadius: 2 },
-  previewText: { fontSize: 11 },
-  previewSub: { fontSize: 9, marginTop: 2 },
+  previewTitle: {},
+  previewSub: {},
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10 },
   cardName: { fontSize: 14, fontWeight: '600' },
 });

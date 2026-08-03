@@ -1,96 +1,127 @@
-// 主题风格定义 v1.6.0 — 10套差异化主题
-// 每套主题：配色 + 卡片样式 + 按钮形状 + 间距密度 + 布局特征
+// 10套差异化主题 v1.7.0 — 像素级精准定义
+// 每套主题：配色 + 卡片样式 + 复选框 + 文字 + 进度条 + 装饰
 
 export const THEME_STYLES = {
 
-  // ─── 1. Sorted（默认）轻阴影 + 细条 + 留白 ───
-  sorted: {
-    id: 'sorted', name: 'Sorted', icon: '✨', cardStyle: 'elevated', radius: 8,
-    shadow: true, leftBar: true, density: 'spacious', btnShape: 'round',
-    divider: false, accentStyle: 'filled',
-    light: { bg: '#FAFAF9', card: '#FFFFFF', sep: '#F0EFED', text: '#292524', sub: '#78716C', hint: '#A8A29E', primary: '#3B82F6', success: '#22C55E', warn: '#F59E0B', danger: '#EF4444', done: '#22C55E', swipeDone: '#DCFCE7', swipeDel: '#FEE2E2' },
-    dark: { bg: '#1C1917', card: '#292524', sep: '#44403C', text: '#FAFAF9', sub: '#D6D3D1', hint: '#A8A29E', primary: '#60A5FA', success: '#4ADE80', warn: '#FBBF24', danger: '#F87171', done: '#4ADE80', swipeDone: '#14532D', swipeDel: '#450A0A' },
-  },
-
-  // ─── 2. Apple 大圆角 + 无细条 + 纯白卡片 ───
+  // ─── 1. Apple原生提醒事项风 ───
   apple: {
-    id: 'apple', name: 'Apple', icon: '🍎', cardStyle: 'elevated', radius: 16,
-    shadow: true, leftBar: false, density: 'spacious', btnShape: 'pill',
-    divider: false, accentStyle: 'filled',
-    light: { bg: '#F5F5F7', card: '#FFFFFF', sep: '#E5E5E7', text: '#1D1D1F', sub: '#86868B', hint: '#AEAEB2', primary: '#007AFF', success: '#34C759', warn: '#FF9500', danger: '#FF3B30', done: '#34C759', swipeDone: '#E8FAF0', swipeDel: '#FFEDEB' },
-    dark: { bg: '#000000', card: '#1C1C1E', sep: '#38383A', text: '#FFFFFF', sub: '#EBEBF5', hint: '#8E8E93', primary: '#0A84FF', success: '#30D158', warn: '#FF9F0A', danger: '#FF453A', done: '#30D158', swipeDone: '#0A3D2A', swipeDel: '#3D0A0A' },
+    id: 'apple', name: 'Apple', iconName: 'apple',
+    cardStyle: 'elevated', cardRadius: 22, shadow: false, leftBar: false,
+    density: 'spacious', btnShape: 'pill', divider: false, accentStyle: 'filled',
+    checkboxStyle: 'circle', checkboxSize: 18, progressBarHeight: 2,
+    fontSize: { title: 16, subtitle: 13, body: 13 }, lineHeight: 1.4,
+    completedTextDecoration: 'line-through', completedTextColor: '#999999',
+    light: { bg: '#F8F9FA', card: '#FFFFFF', sep: '#E5E5EA', text: '#1D1D1F', sub: '#86868B', hint: '#AEAEB2', primary: '#007AFF', success: '#34C759', warn: '#FF9500', danger: '#FF3B30', done: '#34C759', swipeDone: '#E8FAF0', swipeDel: '#FFEDEB', overdue: '#FF3B30' },
+    dark: { bg: '#000000', card: '#1C1C1E', sep: '#38383A', text: '#FFFFFF', sub: '#EBEBF5', hint: '#8E8E93', primary: '#0A84FF', success: '#30D158', warn: '#FF9F0A', danger: '#FF453A', done: '#30D158', swipeDone: '#0A3D2A', swipeDel: '#3D0A0A', overdue: '#FF453A' },
   },
 
-  // ─── 3. Notion 扁平 + 无边 + 分割线 + 紧凑 ───
+  // ─── 2. Notion模块化文档风 ───
   notion: {
-    id: 'notion', name: 'Notion', icon: '📝', cardStyle: 'flat', radius: 4,
-    shadow: false, leftBar: false, density: 'compact', btnShape: 'sharp',
-    divider: true, accentStyle: 'subtle',
-    light: { bg: '#FFFFFF', card: '#FFFFFF', sep: '#E8E7E4', text: '#37352F', sub: '#787774', hint: '#AEACA6', primary: '#37352F', success: '#0F7B69', warn: '#D9730D', danger: '#E03E3E', done: '#0F7B69', swipeDone: '#ECF3ED', swipeDel: '#FDEBEC' },
-    dark: { bg: '#191919', card: '#2F2F2F', sep: '#373737', text: '#FFFFFF', sub: '#9B9A97', hint: '#6B6B6B', primary: '#FFFFFF', success: '#529E6A', warn: '#D9730D', danger: '#E03E3E', done: '#529E6A', swipeDone: '#1A3D1A', swipeDel: '#3D1A1A' },
+    id: 'notion', name: 'Notion', iconName: 'notion',
+    cardStyle: 'flat', cardRadius: 6, shadow: false, leftBar: false,
+    density: 'compact', btnShape: 'sharp', divider: true, accentStyle: 'subtle',
+    checkboxStyle: 'square', checkboxSize: 16, checkboxRadius: 4, progressBarHeight: 0, // 文字进度
+    fontSize: { title: 15, subtitle: 14, body: 14 }, lineHeight: 1.5,
+    completedTextDecoration: 'line-through', completedTextColor: '#999999',
+    light: { bg: '#FFFFFF', card: '#FFFFFF', sep: '#EEEEEE', text: '#37352F', sub: '#787774', hint: '#AEACA6', primary: '#37352F', success: '#0F7B69', warn: '#D9730D', danger: '#FF9500', done: '#0F7B69', swipeDone: '#ECF3ED', swipeDel: '#FDEBEC', overdue: '#FF9500' },
+    dark: { bg: '#191919', card: '#2F2F2F', sep: '#373737', text: '#FFFFFF', sub: '#9B9A97', hint: '#6B6B6B', primary: '#FFFFFF', success: '#529E6A', warn: '#D9730D', danger: '#FF9500', done: '#529E6A', swipeDone: '#1A3D1A', swipeDel: '#3D1A1A', overdue: '#FF9500' },
   },
 
-  // ─── 4. Microsoft 边框卡片 + 紫色 ───
-  microsoft: {
-    id: 'microsoft', name: 'Microsoft', icon: '💜', cardStyle: 'bordered', radius: 6,
-    shadow: false, leftBar: true, density: 'standard', btnShape: 'round',
-    divider: false, accentStyle: 'filled',
-    light: { bg: '#F8F8F8', card: '#FFFFFF', sep: '#EBEBEB', text: '#242424', sub: '#605E5C', hint: '#979593', primary: '#6366F1', success: '#107C10', warn: '#FFB900', danger: '#D13438', done: '#107C10', swipeDone: '#DFF6DD', swipeDel: '#FDE7E9' },
-    dark: { bg: '#1B1B1B', card: '#292929', sep: '#3D3D3D', text: '#FFFFFF', sub: '#CCCCCC', hint: '#999999', primary: '#818CF8', success: '#54B054', warn: '#FFC53D', danger: '#E87070', done: '#54B054', swipeDone: '#1A3D1A', swipeDel: '#3D1A1A' },
+  // ─── 3. 微软Fluent流畅设计风 ───
+  fluent: {
+    id: 'fluent', name: 'Fluent', iconName: 'fluent',
+    cardStyle: 'elevated', cardRadius: 12, shadow: true, leftBar: false,
+    density: 'standard', btnShape: 'round', divider: false, accentStyle: 'filled',
+    checkboxStyle: 'square', checkboxSize: 17, checkboxRadius: 5, progressBarHeight: 6,
+    fontSize: { title: 16, subtitle: 12, body: 14 }, lineHeight: 1.4,
+    completedTextDecoration: 'line-through', completedTextColor: '#999999',
+    light: { bg: '#F3F2F1', card: '#FFFFFF', sep: '#EDEBE9', text: '#242424', sub: '#605E5C', hint: '#979593', primary: '#0078D4', success: '#107C10', warn: '#FFB900', danger: '#E53935', done: '#107C10', swipeDone: '#DFF6DD', swipeDel: '#FDE7E9', overdue: '#E53935' },
+    dark: { bg: '#1B1B1B', card: '#292929', sep: '#3D3D3D', text: '#FFFFFF', sub: '#CCCCCC', hint: '#999999', primary: '#4CC2FF', success: '#54B054', warn: '#FFC53D', danger: '#E87070', done: '#54B054', swipeDone: '#1A3D1A', swipeDel: '#3D1A1A', overdue: '#E87070' },
   },
 
-  // ─── 5. Glass 半透明 + 大圆角 + 轻阴影 ───
-  glass: {
-    id: 'glass', name: 'Glass', icon: '🔮', cardStyle: 'glass', radius: 18,
-    shadow: true, leftBar: true, density: 'spacious', btnShape: 'pill',
-    divider: false, accentStyle: 'filled',
-    light: { bg: '#F0F4FF', card: '#FFFFFF', sep: 'rgba(0,0,0,0.06)', text: '#1A1A2E', sub: '#555577', hint: '#8888AA', primary: '#6366F1', success: '#10B981', warn: '#F59E0B', danger: '#EF4444', done: '#10B981', swipeDone: '#D1FAE5', swipeDel: '#FEE2E2' },
-    dark: { bg: '#0F0F23', card: 'rgba(255,255,255,0.1)', sep: 'rgba(255,255,255,0.08)', text: '#F8FAFC', sub: '#94A3B8', hint: '#64748B', primary: '#818CF8', success: '#34D399', warn: '#FBBF24', danger: '#F87171', done: '#34D399', swipeDone: 'rgba(52,211,153,0.12)', swipeDel: 'rgba(248,113,113,0.12)' },
+  // ─── 4. 纯文本终端极客风 ───
+  terminal: {
+    id: 'terminal', name: 'Terminal', iconName: 'terminal',
+    cardStyle: 'flat', cardRadius: 0, shadow: false, leftBar: false,
+    density: 'compact', btnShape: 'sharp', divider: false, accentStyle: 'subtle',
+    checkboxStyle: 'text', checkboxSize: 15, progressBarHeight: 0, // 文字百分比
+    fontSize: { title: 15, subtitle: 15, body: 15 }, lineHeight: 1.3,
+    completedTextDecoration: 'line-through', completedTextColor: '#666666',
+    monoFont: true,
+    light: { bg: '#FFFFFF', card: '#FFFFFF', sep: '#000000', text: '#000000', sub: '#333333', hint: '#666666', primary: '#000000', success: '#008000', warn: '#FF8C00', danger: '#FF0000', done: '#008000', swipeDone: '#F0FFF0', swipeDel: '#FFF0F0', overdue: '#FF0000' },
+    dark: { bg: '#1E1E1E', card: '#1E1E1E', sep: '#333333', text: '#D4D4D4', sub: '#9CDCFE', hint: '#6A9955', primary: '#569CD6', success: '#6A9955', warn: '#DCDCAA', danger: '#F44747', done: '#6A9955', swipeDone: '#004D00', swipeDel: '#4D0000', overdue: '#F44747' },
   },
 
-  // ─── 6. Sunset 暖橙 + 圆润 + 紧凑 ───
-  sunset: {
-    id: 'sunset', name: 'Sunset', icon: '🌅', cardStyle: 'elevated', radius: 12,
-    shadow: true, leftBar: true, density: 'compact', btnShape: 'pill',
-    divider: false, accentStyle: 'filled',
-    light: { bg: '#FFF8F3', card: '#FFFFFF', sep: '#F5E6D8', text: '#3D1F00', sub: '#8B5E3C', hint: '#C49A7A', primary: '#F97316', success: '#22C55E', warn: '#F59E0B', danger: '#EF4444', done: '#22C55E', swipeDone: '#DCFCE7', swipeDel: '#FEE2E2' },
-    dark: { bg: '#1A0E00', card: '#2D1A08', sep: '#4A2C10', text: '#FFF5EB', sub: '#D4A574', hint: '#996644', primary: '#FB923C', success: '#4ADE80', warn: '#FBBF24', danger: '#F87171', done: '#4ADE80', swipeDone: '#14532D', swipeDel: '#450A0A' },
+  // ─── 5. Claude AI清爽卡片风 ───
+  claude: {
+    id: 'claude', name: 'Claude', iconName: 'claude',
+    cardStyle: 'elevated', cardRadius: 24, shadow: true, leftBar: false,
+    density: 'spacious', btnShape: 'pill', divider: false, accentStyle: 'filled',
+    checkboxStyle: 'rounded', checkboxSize: 19, checkboxRadius: 8, progressBarHeight: 3,
+    fontSize: { title: 16, subtitle: 14, body: 14 }, lineHeight: 1.6,
+    completedTextDecoration: 'none', completedTextColor: '#999999',
+    light: { bg: '#FAFAF8', card: '#FFFFFF', sep: '#E8E6E1', text: '#2C2C2C', sub: '#7A7876', hint: '#A8A6A4', primary: '#C47858', success: '#6B8F5A', warn: '#D4A83C', danger: '#E87566', done: '#6B8F5A', swipeDone: '#F0F5ED', swipeDel: '#FDF0EE', overdue: '#E87566' },
+    dark: { bg: '#1A1917', card: '#252320', sep: '#35332F', text: '#E8E4DF', sub: '#A8A098', hint: '#7A746E', primary: '#D49070', success: '#8FBC8F', warn: '#D4A853', danger: '#D4847E', done: '#8FBC8F', swipeDone: '#2D4A2D', swipeDel: '#5A2D2D', overdue: '#D4847E' },
   },
 
-  // ─── 7. Forest 自然绿 + 边框 ───
-  forest: {
-    id: 'forest', name: 'Forest', icon: '🌿', cardStyle: 'bordered', radius: 10,
-    shadow: false, leftBar: true, density: 'standard', btnShape: 'round',
-    divider: false, accentStyle: 'subtle',
-    light: { bg: '#F4F9F4', card: '#FFFFFF', sep: '#DCE8DC', text: '#1A2E1A', sub: '#4A6B4A', hint: '#7A9B7A', primary: '#2D7D46', success: '#15803D', warn: '#D97706', danger: '#DC2626', done: '#15803D', swipeDone: '#DCFCE7', swipeDel: '#FEE2E2' },
-    dark: { bg: '#0A1A0A', card: '#1A2E1A', sep: '#2D4A2D', text: '#ECFDF5', sub: '#86EFAC', hint: '#4ADE80', primary: '#34D399', success: '#22C55E', warn: '#FBBF24', danger: '#F87171', done: '#22C55E', swipeDone: '#14532D', swipeDel: '#450A0A' },
+  // ─── 6. TickTick滴答专业效率风 ───
+  ticktick: {
+    id: 'ticktick', name: 'TickTick', iconName: 'ticktick',
+    cardStyle: 'elevated', cardRadius: 10, shadow: true, leftBar: true,
+    density: 'compact', btnShape: 'round', divider: false, accentStyle: 'filled',
+    checkboxStyle: 'square', checkboxSize: 18, checkboxRadius: 6, progressBarHeight: 4,
+    fontSize: { title: 16, subtitle: 14, body: 13 }, lineHeight: 1.3,
+    completedTextDecoration: 'line-through', completedTextColor: '#999999',
+    light: { bg: '#F5F5F5', card: '#FFFFFF', sep: '#E8E8E8', text: '#333333', sub: '#666666', hint: '#999999', primary: '#4CAF50', success: '#4CAF50', warn: '#FF9800', danger: '#F53F3F', done: '#4CAF50', swipeDone: '#E8F5E9', swipeDel: '#FFEBEE', overdue: '#F53F3F' },
+    dark: { bg: '#121212', card: '#1E1E1E', sep: '#2C2C2C', text: '#E0E0E0', sub: '#A0A0A0', hint: '#707070', primary: '#66BB6A', success: '#66BB6A', warn: '#FFB74D', danger: '#EF5350', done: '#66BB6A', swipeDone: '#1B5E20', swipeDel: '#B71C1C', overdue: '#EF5350' },
   },
 
-  // ─── 8. Midnight 深蓝紫 + 扁平 + 霓虹强调 ───
-  midnight: {
-    id: 'midnight', name: 'Midnight', icon: '🌃', cardStyle: 'flat', radius: 10,
-    shadow: false, leftBar: true, density: 'standard', btnShape: 'round',
-    divider: true, accentStyle: 'outline',
-    light: { bg: '#F5F3FF', card: '#FFFFFF', sep: '#E0DBF5', text: '#1E1033', sub: '#6B5B8A', hint: '#9D8DBD', primary: '#7C3AED', success: '#10B981', warn: '#F59E0B', danger: '#EF4444', done: '#10B981', swipeDone: '#D1FAE5', swipeDel: '#FEE2E2' },
-    dark: { bg: '#0C0521', card: '#1A0F3D', sep: '#2D1B5E', text: '#F5F3FF', sub: '#C4B5FD', hint: '#8B80B5', primary: '#A78BFA', success: '#34D399', warn: '#FBBF24', danger: '#F87171', done: '#34D399', swipeDone: '#14532D', swipeDel: '#450A0A' },
+  // ─── 7. 日式和风素雅手账风 ───
+  japanese: {
+    id: 'japanese', name: '和风', iconName: 'japanese',
+    cardStyle: 'elevated', cardRadius: 18, shadow: false, leftBar: false,
+    density: 'spacious', btnShape: 'pill', divider: true, accentStyle: 'subtle',
+    checkboxStyle: 'square', checkboxSize: 17, checkboxRadius: 3, progressBarHeight: 2,
+    fontSize: { title: 15, subtitle: 13, body: 13 }, lineHeight: 1.5,
+    completedTextDecoration: 'line-through', completedTextColor: '#999999',
+    light: { bg: '#F8F5F0', card: '#FEFDFB', sep: '#E8E0D4', text: '#212121', sub: '#6B5E50', hint: '#A89888', primary: '#7B9E7B', success: '#6B8F5A', warn: '#C49A3C', danger: '#A8574A', done: '#6B8F5A', swipeDone: '#F0F5ED', swipeDel: '#F5E6E4', overdue: '#A8574A' },
+    dark: { bg: '#1A1814', card: '#2C2926', sep: '#3D3935', text: '#E8E4DF', sub: '#A8A098', hint: '#7A746E', primary: '#8FBC8F', success: '#8FBC8F', warn: '#D4A853', danger: '#C4847A', done: '#8FBC8F', swipeDone: '#2D4A2D', swipeDel: '#5A2D2D', overdue: '#C4847A' },
   },
 
-  // ─── 9. Neon 赛博朋克 + 暗色 + 等宽 ───
-  neon: {
-    id: 'neon', name: 'Neon', icon: '⚡', cardStyle: 'bordered', radius: 4,
-    shadow: false, leftBar: true, density: 'compact', btnShape: 'sharp',
-    divider: false, accentStyle: 'outline',
-    light: { bg: '#F0F0F0', card: '#FFFFFF', sep: '#D0D0D0', text: '#1A1A1A', sub: '#555555', hint: '#888888', primary: '#00BCD4', success: '#00E676', warn: '#FFD600', danger: '#FF1744', done: '#00E676', swipeDone: '#E0F7FA', swipeDel: '#FFEBEE' },
-    dark: { bg: '#0A0A0A', card: '#1A1A1A', sep: '#333333', text: '#00E5FF', sub: '#80DEEA', hint: '#4DD0E1', primary: '#00E5FF', success: '#00E676', warn: '#FFD600', danger: '#FF1744', done: '#00E676', swipeDone: '#004D40', swipeDel: '#B71C1C' },
+  // ─── 8. 暗黑赛博极简风 ───
+  cyber: {
+    id: 'cyber', name: 'Cyber', iconName: 'cyber',
+    cardStyle: 'elevated', cardRadius: 8, shadow: false, leftBar: false,
+    density: 'standard', btnShape: 'sharp', divider: false, accentStyle: 'outline',
+    checkboxStyle: 'square', checkboxSize: 18, checkboxRadius: 4, progressBarHeight: 6,
+    fontSize: { title: 16, subtitle: 14, body: 13 }, lineHeight: 1.4,
+    completedTextDecoration: 'line-through', completedTextColor: '#666666',
+    light: { bg: '#F5F5F5', card: '#FFFFFF', sep: '#E0E0E0', text: '#1A1A1A', sub: '#555555', hint: '#888888', primary: '#4FC3F7', success: '#00E676', warn: '#FFD600', danger: '#FF9800', done: '#00E676', swipeDone: '#E0F7FA', swipeDel: '#FFF3E0', overdue: '#FF9800' },
+    dark: { bg: '#1E2228', card: '#282C34', sep: '#3E4451', text: '#E0E0E0', sub: '#B0BEC5', hint: '#6B7280', primary: '#4FC3F7', success: '#00E676', warn: '#FFD600', danger: '#FF9800', done: '#00E676', swipeDone: '#004D40', swipeDel: '#4D2400', overdue: '#FF9800' },
   },
 
-  // ─── 10. Paper 编辑式 + 衬线 + 宽松 ───
-  paper: {
-    id: 'paper', name: 'Paper', icon: '📄', cardStyle: 'lined', radius: 2,
-    shadow: false, leftBar: false, density: 'spacious', btnShape: 'sharp',
-    divider: true, accentStyle: 'subtle',
-    light: { bg: '#FAF8F5', card: '#FFFFFF', sep: '#E5E2DC', text: '#2C2C2C', sub: '#6B6560', hint: '#9E9892', primary: '#8B7355', success: '#5A7D4A', warn: '#C49A3C', danger: '#B85450', done: '#5A7D4A', swipeDone: '#E8F0E4', swipeDel: '#F5E6E4' },
-    dark: { bg: '#1A1814', card: '#2C2926', sep: '#3D3935', text: '#E8E4DF', sub: '#A8A098', hint: '#7A746E', primary: '#C4A882', success: '#8FBC8F', warn: '#D4A853', danger: '#D4847E', done: '#8FBC8F', swipeDone: '#2D4A2D', swipeDel: '#5A2D2D' },
+  // ─── 9. Linear新锐SaaS高级风 ───
+  linear: {
+    id: 'linear', name: 'Linear', iconName: 'linear',
+    cardStyle: 'flat', cardRadius: 4, shadow: false, leftBar: false,
+    density: 'compact', btnShape: 'sharp', divider: false, accentStyle: 'subtle',
+    checkboxStyle: 'circle', checkboxSize: 16, progressBarHeight: 0, // 文字进度
+    fontSize: { title: 15, subtitle: 13, body: 13 }, lineHeight: 1.4,
+    completedTextDecoration: 'line-through', completedTextColor: '#999999',
+    light: { bg: '#FFFFFF', card: '#FFFFFF', sep: '#F5F5F5', text: '#1A1A1A', sub: '#666666', hint: '#999999', primary: '#5E6AD2', success: '#2E7D32', warn: '#F57C00', danger: '#FFAB91', done: '#2E7D32', swipeDone: '#E8F5E9', swipeDel: '#FFF3E0', overdue: '#FFAB91' },
+    dark: { bg: '#1A1A1A', card: '#222222', sep: '#2E2E2E', text: '#E0E0E0', sub: '#A0A0A0', hint: '#666666', primary: '#7B83EB', success: '#4CAF50', warn: '#FFB74D', danger: '#FF8A65', done: '#4CAF50', swipeDone: '#1B5E20', swipeDel: '#4D2400', overdue: '#FF8A65' },
+  },
+
+  // ─── 10. 复古便利贴松弛风 ───
+  sticky: {
+    id: 'sticky', name: '便利贴', iconName: 'sticky',
+    cardStyle: 'elevated', cardRadius: 20, shadow: true, leftBar: false,
+    density: 'spacious', btnShape: 'pill', divider: false, accentStyle: 'filled',
+    checkboxStyle: 'square', checkboxSize: 19, checkboxRadius: 5, progressBarHeight: 4,
+    fontSize: { title: 16, subtitle: 14, body: 14 }, lineHeight: 1.5,
+    completedTextDecoration: 'line-through', completedTextColor: '#999999',
+    light: { bg: '#F5F0E8', card: '#FFFEF7', sep: '#E8E0D0', text: '#2C2C2C', sub: '#6B6560', hint: '#9E9892', primary: '#E8A87C', success: '#7A9E6B', warn: '#D4A83C', danger: '#C62828', done: '#7A9E6B', swipeDone: '#F0F5ED', swipeDel: '#F5E6E4', overdue: '#C62828' },
+    dark: { bg: '#1A1814', card: '#2C2926', sep: '#3D3935', text: '#E8E4DF', sub: '#A8A098', hint: '#7A746E', primary: '#D4A070', success: '#8FBC8F', warn: '#D4A853', danger: '#D4847E', done: '#8FBC8F', swipeDone: '#2D4A2D', swipeDel: '#5A2D2D', overdue: '#D4847E' },
   },
 
 };
@@ -98,27 +129,34 @@ export const THEME_STYLES = {
 // ─── Helpers ───
 
 export function getTheme(styleId, isDark) {
-  const t = THEME_STYLES[styleId] || THEME_STYLES.sorted;
+  const t = THEME_STYLES[styleId] || THEME_STYLES.apple;
   const c = isDark ? t.dark : t.light;
   return {
     background: c.bg, cardBackground: c.card, separator: c.sep,
     textPrimary: c.text, textSecondary: c.sub, textTertiary: c.hint,
     primary: c.primary, success: c.success, warning: c.warn, danger: c.danger,
     done: c.done, swipeCompleteBg: c.swipeDone, swipeDeleteBg: c.swipeDel,
+    overdue: c.overdue,
   };
 }
 
 export function getStyleConfig(styleId) {
-  const t = THEME_STYLES[styleId] || THEME_STYLES.sorted;
+  const t = THEME_STYLES[styleId] || THEME_STYLES.apple;
   return {
-    cardStyle: t.cardStyle, radius: t.radius, shadow: t.shadow,
+    cardStyle: t.cardStyle, cardRadius: t.cardRadius, shadow: t.shadow,
     leftBar: t.leftBar, density: t.density, btnShape: t.btnShape,
     divider: t.divider, accentStyle: t.accentStyle,
+    checkboxStyle: t.checkboxStyle, checkboxSize: t.checkboxSize,
+    checkboxRadius: t.checkboxRadius || 2, progressBarHeight: t.progressBarHeight,
+    fontSize: t.fontSize, lineHeight: t.lineHeight,
+    completedTextDecoration: t.completedTextDecoration,
+    completedTextColor: t.completedTextColor,
+    monoFont: t.monoFont || false,
   };
 }
 
 export function getAvailableStyles() {
-  return Object.values(THEME_STYLES).map((s) => ({ id: s.id, name: s.name, icon: s.icon }));
+  return Object.values(THEME_STYLES).map((s) => ({ id: s.id, name: s.name, iconName: s.iconName }));
 }
 
 export function hexToRgba(hex, alpha) {
@@ -129,5 +167,5 @@ export function hexToRgba(hex, alpha) {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
-export const LightTheme = getTheme('sorted', false);
-export const DarkTheme = getTheme('sorted', true);
+export const LightTheme = getTheme('apple', false);
+export const DarkTheme = getTheme('apple', true);

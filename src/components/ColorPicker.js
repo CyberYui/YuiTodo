@@ -1,103 +1,93 @@
-// 颜色主题选择器组件（网格布局 + 色球预览）
-import React from 'react';
+// 颜色主题选择器组件（4x4矩阵 + 实时预览 + 边框高亮）
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { TASK_COLORS } from '../utils/constants';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-const PADDING = 20 * 2;
+const PADDING = 32;
 const GAP = 8;
-const CARDS_PER_ROW = 4;
-const CARD_WIDTH = (SCREEN_WIDTH - PADDING - GAP * (CARDS_PER_ROW - 1)) / CARDS_PER_ROW;
+const COLS = 4;
+const CELL_SIZE = (SCREEN_WIDTH - PADDING - GAP * (COLS - 1)) / COLS;
 
 export default function ColorPicker({ selectedColor, onSelect }) {
   const { theme } = useTheme();
+  const [previewColor, setPreviewColor] = useState(null);
   const styles = createStyles(theme);
 
+  // 实时预览：当前选中或悬停的颜色
+  const displayColor = previewColor || (TASK_COLORS.find(c => c.bar === selectedColor) || TASK_COLORS[0]);
+
   return (
-    <View style={styles.grid}>
-      {TASK_COLORS.map((colorObj) => {
-        const isSelected = selectedColor === colorObj.bar;
-        return (
-          <TouchableOpacity
-            key={colorObj.bar}
-            style={[
-              styles.card,
-              { backgroundColor: theme.cardBackground, borderColor: isSelected ? colorObj.bar : theme.separator },
-              isSelected && { borderWidth: 2 },
-            ]}
-            onPress={() => onSelect(colorObj)}
-            activeOpacity={0.7}
-          >
-            {/* 色球预览：显示该主题的4种颜色 */}
-            <View style={styles.dotsRow}>
-              <View style={[styles.dot, { backgroundColor: colorObj.bar }]} />
-              <View style={[styles.dot, { backgroundColor: colorObj.label }]} />
-              <View style={[styles.dot, { backgroundColor: colorObj.date }]} />
-              <View style={[styles.dot, { backgroundColor: colorObj.bar + '80' }]} />
-            </View>
-            {/* 主题名 */}
-            <Text style={[styles.name, { color: theme.textSecondary }]} numberOfLines={1}>
-              {colorObj.name}
-            </Text>
-            {/* 选中标记 */}
-            {isSelected && (
-              <View style={[styles.checkBadge, { backgroundColor: colorObj.bar }]}>
-                <Text style={styles.checkText}>✓</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-        );
-      })}
+    <View style={styles.wrapper}>
+      {/* 实时预览窗口 */}
+      <View style={[styles.previewCard, { backgroundColor: theme.cardBackground, borderColor: theme.separator }]}>
+        <View style={[styles.previewLeftBar, { backgroundColor: displayColor.bar }]} />
+        <View style={styles.previewContent}>
+          <View style={[styles.previewTitle, { backgroundColor: displayColor.bar }]} />
+          <View style={[styles.previewSubtitle, { backgroundColor: displayColor.label + '40' }]} />
+          <View style={styles.previewDots}>
+            <View style={[styles.previewDot, { backgroundColor: displayColor.bar }]} />
+            <View style={[styles.previewDot, { backgroundColor: displayColor.label }]} />
+            <View style={[styles.previewDot, { backgroundColor: displayColor.date }]} />
+          </View>
+        </View>
+        <View style={[styles.previewBadge, { backgroundColor: displayColor.bg }]} />
+      </View>
+
+      {/* 4x4 色块矩阵 */}
+      <View style={styles.grid}>
+        {TASK_COLORS.map((colorObj) => {
+          const isSelected = selectedColor === colorObj.bar;
+          return (
+            <TouchableOpacity
+              key={colorObj.bar}
+              style={[
+                styles.cell,
+                { backgroundColor: colorObj.bar },
+                isSelected && { borderWidth: 2, borderColor: colorObj.label },
+              ]}
+              onPress={() => onSelect(colorObj)}
+              onPressIn={() => setPreviewColor(colorObj)}
+              onPressOut={() => setPreviewColor(null)}
+              activeOpacity={0.8}
+            />
+          );
+        })}
+      </View>
     </View>
   );
 }
 
 function createStyles(theme) {
   return StyleSheet.create({
+    wrapper: { gap: 12 },
+    previewCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderRadius: 12,
+      borderWidth: 1,
+      padding: 12,
+      gap: 10,
+    },
+    previewLeftBar: { width: 4, height: 40, borderRadius: 2 },
+    previewContent: { flex: 1, gap: 6 },
+    previewTitle: { width: '60%', height: 10, borderRadius: 3 },
+    previewSubtitle: { width: '40%', height: 8, borderRadius: 3 },
+    previewDots: { flexDirection: 'row', gap: 4 },
+    previewDot: { width: 12, height: 12, borderRadius: 6 },
+    previewBadge: { width: 16, height: 16, borderRadius: 8 },
     grid: {
       flexDirection: 'row',
       flexWrap: 'wrap',
       gap: GAP,
     },
-    card: {
-      width: CARD_WIDTH,
-      borderRadius: 10,
-      borderWidth: 1,
-      borderColor: 'transparent',
-      padding: 8,
-      alignItems: 'center',
-      position: 'relative',
-    },
-    dotsRow: {
-      flexDirection: 'row',
-      gap: 4,
-      marginBottom: 6,
-    },
-    dot: {
-      width: 14,
-      height: 14,
-      borderRadius: 7,
-    },
-    name: {
-      fontSize: 10,
-      textAlign: 'center',
-      fontWeight: '500',
-    },
-    checkBadge: {
-      position: 'absolute',
-      top: 4,
-      right: 4,
-      width: 16,
-      height: 16,
+    cell: {
+      width: CELL_SIZE,
+      height: CELL_SIZE,
       borderRadius: 8,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    checkText: {
-      color: '#FFFFFF',
-      fontSize: 10,
-      fontWeight: '700',
+      borderWidth: 2,
+      borderColor: 'transparent',
     },
   });
 }

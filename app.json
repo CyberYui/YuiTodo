@@ -2,7 +2,7 @@
   "expo": {
     "name": "YuiTodo",
     "slug": "yui-todo",
-    "version": "1.6.0",
+    "version": "1.7.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -20,7 +20,8 @@
     },
     "plugins": [
       ["expo-image-picker", { "photosPermission": "允许 YuiTodo 访问您的相册以选择背景图片" }],
-      ["expo-notifications", { "color": "#3B82F6" }]
+      ["expo-notifications", { "color": "#3B82F6" }],
+      "./plugins/icon-alias/withIconAlias"
     ]
   }
 }

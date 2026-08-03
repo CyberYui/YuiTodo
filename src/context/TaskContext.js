@@ -202,57 +202,60 @@ export function TaskProvider({ children }) {
 
     // 演示任务1：带步骤的今日任务（蓝色主题）
     const task1Id = await createTask({
-      title: '📝 完成项目报告',
+      title: '完成项目报告',
       note: '这是一个带步骤的任务示例',
       start_time: today,
       end_time: today + 2 * 60 * 60 * 1000,
       start_date: today,
-      color: TASK_COLORS[0].bar, // 蓝色
+      color: TASK_COLORS[0].bar,
       deadline: null,
       recurrence_id: null,
+      sort_order: 0,
     });
     await createSteps(task1Id, ['收集数据', '撰写初稿', '审核修改', '提交报告']);
 
     // 演示任务2：有循环的任务（绿色主题，每年生日）
-    const birthday = new Date(now.getFullYear(), 2, 12).getTime(); // 3月12日
+    const birthday = new Date(now.getFullYear(), 2, 12).getTime();
     const recurRule2Id = await createRecurrenceRule({ type: 'yearly', interval: 1, month_of_year: 3, day_of_month: 12 });
     await createTask({
-      title: '🎂 妈妈生日',
+      title: '妈妈生日',
       note: '每年循环的纪念日示例',
       start_time: birthday,
       end_time: birthday + day,
       start_date: birthday,
-      color: TASK_COLORS[1].bar, // 绿色
+      color: TASK_COLORS[1].bar,
       deadline: null,
       recurrence_id: recurRule2Id,
+      sort_order: 1,
     });
 
     // 演示任务3：未来任务（紫色主题）
     const task3Id = await createTask({
-      title: '🏖️ 暑假旅行计划',
+      title: '暑假旅行计划',
       note: '未来任务示例，已自动归档到对应月份',
       start_time: today + 30 * day,
       end_time: today + 37 * day,
       start_date: today + 30 * day,
-      color: TASK_COLORS[4].bar, // 紫色
+      color: TASK_COLORS[4].bar,
       deadline: null,
       recurrence_id: null,
+      sort_order: 2,
     });
     await createSteps(task3Id, ['确定目的地', '预订机票', '打包行李']);
 
     // 演示任务4：已完成任务（橙色主题）
     const task4Id = await createTask({
-      title: '✅ 已完成示例',
+      title: '已完成示例',
       note: '这是一个已完成的任务示例',
       start_time: today - day,
       end_time: today - day + 60 * 60 * 1000,
       start_date: today - day,
-      color: TASK_COLORS[2].bar, // 橙色
+      color: TASK_COLORS[2].bar,
       deadline: null,
       recurrence_id: null,
+      sort_order: 3,
     });
     await createSteps(task4Id, ['步骤1', '步骤2']);
-    // 标记为已完成
     await updateTaskStatus(task4Id, TaskStatus.DONE);
     const steps4 = await getStepsByTaskId(task4Id);
     for (const s of steps4) {
@@ -260,16 +263,45 @@ export function TaskProvider({ children }) {
     }
 
     // 演示任务5：过去日期的任务（粉色主题，纪念日）
-    const memorial = new Date(now.getFullYear(), 0, 1).getTime(); // 1月1日
+    const memorial = new Date(now.getFullYear(), 0, 1).getTime();
     await createTask({
-      title: '🎉 元旦纪念日',
+      title: '元旦纪念日',
       note: '过去日期的任务示例，归档到1月',
       start_time: memorial,
       end_time: memorial + day,
       start_date: memorial,
-      color: TASK_COLORS[5].bar, // 粉色
+      color: TASK_COLORS[5].bar,
       deadline: null,
       recurrence_id: null,
+      sort_order: 4,
+    });
+
+    // 演示任务6：带番茄钟的任务（青色主题）
+    const task6Id = await createTask({
+      title: '专注学习新技能',
+      note: '使用番茄钟进行专注学习',
+      start_time: today + day,
+      end_time: today + day + 3 * 60 * 60 * 1000,
+      start_date: today + day,
+      color: TASK_COLORS[6].bar,
+      deadline: null,
+      recurrence_id: null,
+      sort_order: 5,
+    });
+    await createSteps(task6Id, ['观看教学视频', '完成练习题目', '总结学习笔记']);
+
+    // 演示任务7：每日循环任务（靛蓝主题）
+    const recurRule7Id = await createRecurrenceRule({ type: 'daily', interval: 1 });
+    await createTask({
+      title: '每日运动30分钟',
+      note: '保持健康的生活习惯',
+      start_time: today,
+      end_time: today + 30 * 60 * 1000,
+      start_date: today,
+      color: TASK_COLORS[7].bar,
+      deadline: null,
+      recurrence_id: recurRule7Id,
+      sort_order: 6,
     });
 
     // 创建演示分组

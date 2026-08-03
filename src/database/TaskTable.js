@@ -81,14 +81,29 @@ export async function cleanupDeletedTasks() {
 export async function restoreTask(task) {
   const db = getDatabase();
   const now = Date.now();
+  // 软删除恢复：直接更新deleted_at为NULL，保留原有ID和步骤关联
   await db.execAsync([{
-    sql: `INSERT INTO task (title, note, status, start_time, end_time, deadline, start_date, color, recurrence_id, is_starred, group_id, created_at, updated_at, sort_order)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    args: [task.title, task.note || '', task.status || TaskStatus.PENDING, task.start_time, task.end_time || null, task.deadline || null, task.start_date || task.start_time, task.color || '#3B82F6', task.recurrence_id || null, task.is_starred || 0, task.group_id || 0, task.created_at || now, now, task.sort_order || 0],
+    sql: 'UPDATE task SET deleted_at = NULL, updated_at = ? WHERE id = ?',
+    args: [now, task.id],
   }], false);
 }
 
 export async function archiveTask(taskId) {
   const db = getDatabase();
   await db.execAsync([{ sql: "UPDATE task SET status = 'archived', updated_at = ? WHERE id = ?", args: [Date.now(), taskId] }], false);
+}
+
+// 更新任务排序
+export async function updateTaskSortOrder(taskId, sortOrder) {
+  const db = getDatabase();
+  await db.execAsync([{ sql: 'UPDATE task SET sort_order = ?, updated_at = ? WHERE id = ?', args: [sortOrder, Date.now(), taskId] }], false);
+}
+
+// 批量更新排序
+export async function batchUpdateSortOrders(updates) {
+  const db = getDatabase();
+  const now = Date.now();
+  for (const { id, sortOrder } of updates) {
+    await db.execAsync([{ sql: 'UPDATE task SET sort_order = ?, updated_at = ? WHERE id = ?', args: [sortOrder, now, id] }], false);
+  }
 }

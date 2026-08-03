@@ -5,6 +5,7 @@ import { useTheme } from '../context/ThemeContext';
 import { APP_ICONS, getAppIcon } from '../theme/appIcons';
 import { initDatabase, getDatabase } from '../database/Database';
 import ThemedText from '../components/ThemedText';
+import IconChanger from '../../modules/icon-changer';
 
 export default function IconPickerScreen({ navigation }) {
   const { theme } = useTheme();
@@ -26,11 +27,14 @@ export default function IconPickerScreen({ navigation }) {
 
   async function saveSelection(id) {
     try {
+      // 调用原生模块更换图标
+      IconChanger.changeIcon(id);
+      // 保存设置到数据库
       await initDatabase();
       const db = getDatabase();
       await db.execAsync([{ sql: "INSERT OR REPLACE INTO app_setting (key, value) VALUES ('app_icon', ?)", args: [id] }], false);
       setSelectedId(id);
-      Alert.alert('图标已更换', '请重启应用以查看新图标');
+      Alert.alert('图标已更换', '桌面图标已更新，如未生效请重启设备');
     } catch (e) {
       Alert.alert('保存失败', '无法保存图标设置');
     }

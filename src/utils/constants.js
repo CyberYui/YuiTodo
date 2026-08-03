@@ -2,7 +2,7 @@
 // 集中管理所有魔法值，避免散落在代码各处
 
 // ==================== App版本号 ====================
-export const APP_VERSION = '1.5.8';
+export const APP_VERSION = '1.7.0';
 
 // ==================== 任务状态枚举 ====================
 // 每个任务必定处于以下四种状态之一
@@ -57,20 +57,25 @@ export const CYCLE_LIMITS = {
 export const getDefaultStartTime = () => Date.now();
 // 任务默认结束时间为开始时间后24小时
 export const getDefaultEndTime = () => Date.now() + 24 * 60 * 60 * 1000;
-// ==================== 任务颜色预设（14种主题） ====================
+// ==================== 任务颜色预设（16种，4x4矩阵） ====================
 // 每种主题包含：任务条色、循环标签色、日期标签色、背景色
 export const TASK_COLORS = [
+  // 第1行：基础色
   { name: '海洋', bar: '#3B82F6', label: '#06B6D4', date: '#6B7280', bg: '#3B82F620' },
-  { name: '森林', bar: '#10B981', label: '#F59E0B', date: '#6B7280', bg: '#10B98120' },
-  { name: '日落', bar: '#F59E0B', label: '#EF4444', date: '#8B5CF6', bg: '#F59E0B20' },
-  { name: '樱花', bar: '#EC4899', label: '#8B5CF6', date: '#06B6D4', bg: '#EC489920' },
-  { name: '紫罗兰', bar: '#8B5CF6', label: '#EC4899', date: '#F59E0B', bg: '#8B5CF620' },
-  { name: '红宝石', bar: '#EF4444', label: '#F59E0B', date: '#10B981', bg: '#EF444420' },
-  // 编程主题
+  { name: '森林', bar: '#10B981', label: '#059669', date: '#6B7280', bg: '#10B98120' },
+  { name: '日落', bar: '#F59E0B', label: '#D97706', date: '#8B5CF6', bg: '#F59E0B20' },
+  { name: '樱花', bar: '#EC4899', label: '#DB2777', date: '#06B6D4', bg: '#EC489920' },
+  // 第2行：扩展色
+  { name: '紫罗兰', bar: '#8B5CF6', label: '#7C3AED', date: '#F59E0B', bg: '#8B5CF620' },
+  { name: '红宝石', bar: '#EF4444', label: '#DC2626', date: '#10B981', bg: '#EF444420' },
+  { name: '青碧', bar: '#14B8A6', label: '#0D9488', date: '#6366F1', bg: '#14B8A620' },
+  { name: '靛蓝', bar: '#6366F1', label: '#4F46E5', date: '#EC4899', bg: '#6366F120' },
+  // 第3行：编程主题
   { name: 'Monokai', bar: '#F92672', label: '#A6E22E', date: '#66D9EF', bg: '#F9267220' },
   { name: 'Dracula', bar: '#FF79C6', label: '#50FA7B', date: '#BD93F9', bg: '#FF79C620' },
   { name: 'Nord', bar: '#88C0D0', label: '#81A1C1', date: '#5E81AC', bg: '#88C0D020' },
   { name: 'One Dark', bar: '#E06C75', label: '#98C379', date: '#61AFEF', bg: '#E06C7520' },
+  // 第4行：更多主题
   { name: 'Solarized', bar: '#268BD2', label: '#859900', date: '#2AA198', bg: '#268BD220' },
   { name: 'Gruvbox', bar: '#FE8019', label: '#B8BB26', date: '#FABD2F', bg: '#FE801920' },
   { name: 'Tokyo Night', bar: '#7AA2F7', label: '#9ECE6A', date: '#BB9AF7', bg: '#7AA2F720' },

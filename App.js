@@ -2,13 +2,15 @@
 // 应用启动时第一个被渲染的组件
 // 职责：1. 包裹全局Provider  2. 配置导航栈  3. 定义页面路由
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import IconChanger from './modules/icon-changer';
+import { initDatabase, getDatabase } from './src/database/Database';
 
 // 导入全局状态Provider
 import { ThemeProvider } from './src/context/ThemeContext';
@@ -17,6 +19,7 @@ import { BackgroundProvider } from './src/context/BackgroundContext';
 import { ReminderProvider } from './src/context/ReminderContext';
 import { TaskProvider } from './src/context/TaskContext';
 import { ListProvider } from './src/context/ListContext';
+import { DragSortProvider } from './src/context/DragSortContext';
 
 // 导入页面组件
 import HomeScreen from './src/screens/HomeScreen';
@@ -50,6 +53,20 @@ function FontLoadingScreen() {
 function AppContent() {
   const { loaded } = useFontLoader();
 
+  // 启动时恢复桌面图标设置
+  useEffect(() => {
+    (async () => {
+      try {
+        await initDatabase();
+        const db = getDatabase();
+        const result = await db.execAsync([{ sql: "SELECT value FROM app_setting WHERE key='app_icon'", args: [] }], true);
+        if (result[0].rows.length > 0) {
+          IconChanger.changeIcon(result[0].rows[0].value);
+        }
+      } catch (e) {}
+    })();
+  }, []);
+
   if (!loaded) {
     return <FontLoadingScreen />;
   }
@@ -71,7 +88,7 @@ function AppContent() {
         <Stack.Screen
           name="Home"
           component={HomeScreen}
-          options={{ title: 'YuiTodo' }}
+          options={{ title: '' }}
         />
         <Stack.Screen
           name="Statistics"
@@ -131,8 +148,10 @@ export default function App() {
                 <TaskProvider>
                   {/* 列表数据Provider */}
                   <ListProvider>
-                    <AppContent />
-                  </ListProvider>
+                     <DragSortProvider>
+                       <AppContent />
+                     </DragSortProvider>
+                   </ListProvider>
                 </TaskProvider>
               </ReminderProvider>
             </BackgroundProvider>
