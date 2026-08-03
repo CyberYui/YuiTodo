@@ -1,15 +1,76 @@
-// 主题风格定义：4种风格 × 深浅变体
-// 每种风格包含完整的配色方案 + 样式属性（圆角、阴影等）
+// 主题风格定义：4种精选风格 × 深浅变体
+// 每种风格包含完整配色 + 样式属性（圆角、阴影、任务背景等）
+//
+// 设计原则：
+// - 任务背景使用极淡的主题色融合，而非边框式色块
+// - 深浅变体在对比度、饱和度上独立调校
+// - 圆角/阴影/间距符合各风格的设计语言
 
 export const THEME_STYLES = {
+  // ─── Sorted 风格：极简、留白、彩色左条 ───
+  sorted: {
+    id: 'sorted',
+    name: 'Sorted',
+    icon: '✨',
+    light: {
+      background: '#FAFAF9',
+      cardBackground: '#FFFFFF',
+      separator: '#F0EFED',
+      textPrimary: '#292524',
+      textSecondary: '#78716C',
+      textTertiary: '#A8A29E',
+      primary: '#3B82F6',
+      success: '#22C55E',
+      warning: '#F59E0B',
+      danger: '#EF4444',
+      pending: '#3B82F6',
+      done: '#22C55E',
+      postponed: '#F59E0B',
+      archived: '#A8A29E',
+      swipeCompleteBg: '#DCFCE7',
+      swipePostponeBg: '#FEF3C7',
+      swipeDeleteBg: '#FEE2E2',
+    },
+    dark: {
+      background: '#1C1917',
+      cardBackground: '#292524',
+      separator: '#44403C',
+      textPrimary: '#FAFAF9',
+      textSecondary: '#D6D3D1',
+      textTertiary: '#A8A29E',
+      primary: '#60A5FA',
+      success: '#4ADE80',
+      warning: '#FBBF24',
+      danger: '#F87171',
+      pending: '#60A5FA',
+      done: '#4ADE80',
+      postponed: '#FBBF24',
+      archived: '#78716C',
+      swipeCompleteBg: '#14532D',
+      swipePostponeBg: '#451A03',
+      swipeDeleteBg: '#450A0A',
+    },
+    cardRadius: 8,
+    shadowStyle: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.04,
+      shadowRadius: 4,
+      elevation: 1,
+    },
+    taskBgAlpha: 0.06,
+    taskBgStyle: 'tint',
+  },
+
+  // ─── Apple 风格：大圆角、优雅阴影、SF 设计语言 ───
   apple: {
     id: 'apple',
     name: 'Apple',
     icon: '🍎',
     light: {
-      background: '#F5F7FA',
+      background: '#F5F5F7',
       cardBackground: '#FFFFFF',
-      separator: '#E5E7EB',
+      separator: '#E5E5E7',
       textPrimary: '#1D1D1F',
       textSecondary: '#86868B',
       textTertiary: '#AEAEB2',
@@ -21,13 +82,13 @@ export const THEME_STYLES = {
       done: '#34C759',
       postponed: '#FF9500',
       archived: '#8E8E93',
-      swipeCompleteBg: '#D1F5E0',
-      swipePostponeBg: '#FFF0D0',
-      swipeDeleteBg: '#FFD6D0',
+      swipeCompleteBg: '#E8FAF0',
+      swipePostponeBg: '#FFF8E8',
+      swipeDeleteBg: '#FFEDEB',
     },
     dark: {
-      background: '#1C1C1E',
-      cardBackground: '#2C2C2E',
+      background: '#000000',
+      cardBackground: '#1C1C1E',
       separator: '#38383A',
       textPrimary: '#FFFFFF',
       textSecondary: '#EBEBF5',
@@ -44,23 +105,27 @@ export const THEME_STYLES = {
       swipePostponeBg: '#3D2A0A',
       swipeDeleteBg: '#3D0A0A',
     },
-    cardRadius: 12,
+    cardRadius: 14,
     shadowStyle: {
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.06,
-      shadowRadius: 8,
+      shadowOpacity: 0.08,
+      shadowRadius: 12,
       elevation: 3,
     },
+    taskBgAlpha: 0.05,
+    taskBgStyle: 'shadow',
   },
+
+  // ─── Microsoft To Do 风格：清爽卡片、紫色强调 ───
   microsoft: {
     id: 'microsoft',
     name: 'Microsoft',
     icon: '💜',
     light: {
-      background: '#F3F2F1',
+      background: '#F8F8F8',
       cardBackground: '#FFFFFF',
-      separator: '#E1DFDD',
+      separator: '#EBEBEB',
       textPrimary: '#242424',
       textSecondary: '#605E5C',
       textTertiary: '#979593',
@@ -77,8 +142,8 @@ export const THEME_STYLES = {
       swipeDeleteBg: '#FDE7E9',
     },
     dark: {
-      background: '#202020',
-      cardBackground: '#2D2D2D',
+      background: '#1B1B1B',
+      cardBackground: '#292929',
       separator: '#3D3D3D',
       textPrimary: '#FFFFFF',
       textSecondary: '#CCCCCC',
@@ -95,129 +160,94 @@ export const THEME_STYLES = {
       swipePostponeBg: '#3D330A',
       swipeDeleteBg: '#3D1A1A',
     },
-    cardRadius: 2,
+    cardRadius: 6,
     shadowStyle: {
       shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.08,
-      shadowRadius: 3,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.06,
+      shadowRadius: 6,
       elevation: 2,
     },
-    borderWidth: 1,
+    taskBgAlpha: 0.07,
+    taskBgStyle: 'tint',
+    cardBorderWidth: 1,
+    cardBorderColor: '#EBEBEB',
   },
-  minimal: {
-    id: 'minimal',
-    name: '极简',
-    icon: '⚪',
-    light: {
-      background: '#FAFAFA',
-      cardBackground: '#FFFFFF',
-      separator: '#E0E0E0',
-      textPrimary: '#333333',
-      textSecondary: '#666666',
-      textTertiary: '#999999',
-      primary: '#333333',
-      success: '#4CAF50',
-      warning: '#FF9800',
-      danger: '#F44336',
-      pending: '#333333',
-      done: '#4CAF50',
-      postponed: '#FF9800',
-      archived: '#9E9E9E',
-      swipeCompleteBg: '#E8F5E9',
-      swipePostponeBg: '#FFF3E0',
-      swipeDeleteBg: '#FFEBEE',
-    },
-    dark: {
-      background: '#111111',
-      cardBackground: '#1A1A1A',
-      separator: '#333333',
-      textPrimary: '#EEEEEE',
-      textSecondary: '#AAAAAA',
-      textTertiary: '#777777',
-      primary: '#EEEEEE',
-      success: '#81C784',
-      warning: '#FFB74D',
-      danger: '#E57373',
-      pending: '#EEEEEE',
-      done: '#81C784',
-      postponed: '#FFB74D',
-      archived: '#616161',
-      swipeCompleteBg: '#1B3D1B',
-      swipePostponeBg: '#3D2E0A',
-      swipeDeleteBg: '#3D0A0A',
-    },
-    cardRadius: 0,
-    shadowStyle: null,
-  },
+
+  // ─── Glass 风格：半透明、渐变、现代感 ───
   glass: {
     id: 'glass',
-    name: '玻璃',
+    name: 'Glass',
     icon: '🔮',
     light: {
-      background: '#E8EAF6',
-      cardBackground: 'rgba(255,255,255,0.7)',
-      separator: 'rgba(255,255,255,0.3)',
+      background: '#F0F4FF',
+      cardBackground: 'rgba(255,255,255,0.75)',
+      separator: 'rgba(0,0,0,0.06)',
       textPrimary: '#1A1A2E',
-      textSecondary: '#4A4A6A',
-      textTertiary: '#7A7A9A',
-      primary: '#7C4DFF',
-      success: '#69F0AE',
-      warning: '#FFD740',
-      danger: '#FF5252',
-      pending: '#7C4DFF',
-      done: '#69F0AE',
-      postponed: '#FFD740',
-      archived: '#B0BEC5',
-      swipeCompleteBg: 'rgba(105,240,174,0.2)',
-      swipePostponeBg: 'rgba(255,215,64,0.2)',
-      swipeDeleteBg: 'rgba(255,82,82,0.2)',
+      textSecondary: '#555577',
+      textTertiary: '#8888AA',
+      primary: '#6366F1',
+      success: '#10B981',
+      warning: '#F59E0B',
+      danger: '#EF4444',
+      pending: '#6366F1',
+      done: '#10B981',
+      postponed: '#F59E0B',
+      archived: '#94A3B8',
+      swipeCompleteBg: 'rgba(16,185,129,0.15)',
+      swipePostponeBg: 'rgba(245,158,11,0.15)',
+      swipeDeleteBg: 'rgba(239,68,68,0.15)',
     },
     dark: {
-      background: '#1A1A2E',
-      cardBackground: 'rgba(30,30,50,0.7)',
-      separator: 'rgba(255,255,255,0.1)',
-      textPrimary: '#FFFFFF',
-      textSecondary: '#B0B0D0',
-      textTertiary: '#7070A0',
-      primary: '#B388FF',
-      success: '#69F0AE',
-      warning: '#FFD740',
-      danger: '#FF5252',
-      pending: '#B388FF',
-      done: '#69F0AE',
-      postponed: '#FFD740',
-      archived: '#708090',
-      swipeCompleteBg: 'rgba(105,240,174,0.15)',
-      swipePostponeBg: 'rgba(255,215,64,0.15)',
-      swipeDeleteBg: 'rgba(255,82,82,0.15)',
+      background: '#0F0F23',
+      cardBackground: 'rgba(255,255,255,0.08)',
+      separator: 'rgba(255,255,255,0.08)',
+      textPrimary: '#F8FAFC',
+      textSecondary: '#94A3B8',
+      textTertiary: '#64748B',
+      primary: '#818CF8',
+      success: '#34D399',
+      warning: '#FBBF24',
+      danger: '#F87171',
+      pending: '#818CF8',
+      done: '#34D399',
+      postponed: '#FBBF24',
+      archived: '#475569',
+      swipeCompleteBg: 'rgba(52,211,153,0.12)',
+      swipePostponeBg: 'rgba(251,191,36,0.12)',
+      swipeDeleteBg: 'rgba(248,113,113,0.12)',
     },
     cardRadius: 16,
     shadowStyle: {
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.1,
-      shadowRadius: 12,
-      elevation: 5,
+      shadowOpacity: 0.08,
+      shadowRadius: 16,
+      elevation: 4,
     },
+    taskBgAlpha: 0.08,
+    taskBgStyle: 'tint',
     useBlur: true,
   },
 };
 
-// Helper: get theme for current style + mode
+// Helper: get theme colors for current style + mode
 export function getTheme(themeStyleId, isDark) {
-  const style = THEME_STYLES[themeStyleId] || THEME_STYLES.apple;
+  const style = THEME_STYLES[themeStyleId] || THEME_STYLES.sorted;
   return isDark ? style.dark : style.light;
 }
 
 // Helper: get style config (radius, shadow, etc.)
 export function getStyleConfig(themeStyleId) {
-  const style = THEME_STYLES[themeStyleId] || THEME_STYLES.apple;
+  const style = THEME_STYLES[themeStyleId] || THEME_STYLES.sorted;
   return {
     cardRadius: style.cardRadius,
     shadowStyle: style.shadowStyle,
-    borderWidth: style.borderWidth || 0,
+    borderWidth: style.cardBorderWidth || 0,
+    borderColor: style.cardBorderColor,
     useBlur: style.useBlur || false,
+    taskBgAlpha: style.taskBgAlpha || 0.06,
+    taskBgStyle: style.taskBgStyle || 'tint',
   };
 }
 
@@ -226,6 +256,17 @@ export function getAvailableStyles() {
   return Object.values(THEME_STYLES).map((s) => ({ id: s.id, name: s.name, icon: s.icon }));
 }
 
-// Legacy exports (for backward compatibility during migration)
-export const LightTheme = THEME_STYLES.apple.light;
-export const DarkTheme = THEME_STYLES.apple.dark;
+// Helper: convert hex to rgba
+export function hexToRgba(hex, alpha) {
+  if (!hex || typeof hex !== 'string' || !hex.startsWith('#')) {
+    return `rgba(59,130,246,${alpha})`;
+  }
+  const r = parseInt(hex.slice(1, 3), 16) || 0;
+  const g = parseInt(hex.slice(3, 5), 16) || 0;
+  const b = parseInt(hex.slice(5, 7), 16) || 0;
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+// Legacy exports (for backward compatibility)
+export const LightTheme = THEME_STYLES.sorted.light;
+export const DarkTheme = THEME_STYLES.sorted.dark;

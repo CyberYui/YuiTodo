@@ -60,15 +60,21 @@ export default function TaskItem({
   const bgColor = taskTheme.bg;
 
   function getCardBackground() {
-    const color = taskBgMode === 'uniform' ? taskBgColor : taskColor;
-    return hexToRgba(color, isDark ? 0.2 : 0.12);
+    const alpha = styleConfig?.taskBgAlpha || 0.06;
+    if (taskBgMode === 'uniform') {
+      return hexToRgba(taskBgColor, alpha);
+    }
+    // follow mode: subtle task theme tint
+    return hexToRgba(taskColor, alpha);
   }
 
   function hexToRgba(hex, alpha) {
-    if (!hex || !hex.startsWith('#')) return `rgba(59,130,246,${alpha})`;
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
+    if (!hex || typeof hex !== 'string' || !hex.startsWith('#')) {
+      return `rgba(59,130,246,${alpha})`;
+    }
+    const r = parseInt(hex.slice(1, 3), 16) || 0;
+    const g = parseInt(hex.slice(3, 5), 16) || 0;
+    const b = parseInt(hex.slice(5, 7), 16) || 0;
     return `rgba(${r},${g},${b},${alpha})`;
   }
 
@@ -157,7 +163,15 @@ export default function TaskItem({
       overshootFriction={8}
     >
       <TouchableOpacity
-        style={[styles.card, { backgroundColor: getCardBackground(), opacity: isDone ? 0.6 : 1, borderRadius: styleConfig?.cardRadius || 10 }]}
+        style={[
+          styles.card,
+          {
+            backgroundColor: styleConfig?.taskBgStyle === 'shadow' ? theme.cardBackground : getCardBackground(),
+            opacity: isDone ? 0.6 : 1,
+            borderRadius: styleConfig?.cardRadius || 10,
+            ...(styleConfig?.shadowStyle || {}),
+          },
+        ]}
         onPress={() => onPress(task)}
         onLongPress={() => onPress(task)}
         activeOpacity={0.8}

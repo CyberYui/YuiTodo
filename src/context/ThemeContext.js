@@ -9,7 +9,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { useColorScheme } from 'react-native';
-import { getTheme, getStyleConfig, getAvailableStyles } from '../theme/colors';
+import { getTheme, getStyleConfig, getAvailableStyles, hexToRgba } from '../theme/colors';
 import { initDatabase, getDatabase } from '../database/Database';
 
 // 主题切换模式枚举
@@ -39,7 +39,7 @@ export function ThemeProvider({ children }) {
   const [themeMode, setThemeModeState] = useState(ThemeMode.AUTO);
   const [darkStartTime, setDarkStartTime] = useState('21:00'); // 默认深色模式开始时间（21:00）
   const [lightStartTime, setLightStartTime] = useState('07:00'); // 默认浅色模式开始时间（07:00）
-  const [themeStyle, setThemeStyleState] = useState('apple');
+  const [themeStyle, setThemeStyleState] = useState('sorted');
   const [taskBgMode, setTaskBgModeState] = useState('follow');
   const [taskBgColor, setTaskBgColorState] = useState('#3B82F6');
 
@@ -65,7 +65,7 @@ export function ThemeProvider({ children }) {
         else if (row.key === 'theme_dark_start') setDarkStartTime(row.value);
         else if (row.key === 'theme_light_start') setLightStartTime(row.value);
         else if (row.key === 'theme_style') {
-          const validStyles = ['apple', 'microsoft', 'minimal', 'glass'];
+          const validStyles = ['sorted', 'apple', 'microsoft', 'glass'];
           if (validStyles.includes(row.value)) setThemeStyleState(row.value);
         }
         else if (row.key === 'task_bg_mode') setTaskBgModeState(row.value);
