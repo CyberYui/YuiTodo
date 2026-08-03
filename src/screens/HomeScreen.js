@@ -7,8 +7,9 @@
 // 3. 已完成任务（默认隐藏，底部显示数量）
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Alert, ScrollView, ImageBackground } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
+import { useBackground } from '../context/BackgroundContext';
 import { useTasks } from '../context/TaskContext';
 import { TaskStatus } from '../utils/constants';
 import { isDateToday, isExpired } from '../utils/dateHelpers';
@@ -19,6 +20,7 @@ import ThemedText from '../components/ThemedText';
 
 export default function HomeScreen({ navigation }) {
   const { theme } = useTheme();
+  const { imageUri, opacity, hasBackground } = useBackground();
   const { tasks, isLoading, groups, currentGroupId, setCurrentGroupId, completeTask, removeTask, toggleStep, toggleStar } = useTasks();
 
   const [editorVisible, setEditorVisible] = useState(false);
@@ -167,8 +169,14 @@ export default function HomeScreen({ navigation }) {
     </ScrollView>
   ) : null;
 
+  const Container = hasBackground ? ImageBackground : View;
+  const imageProps = hasBackground ? {
+    source: { uri: imageUri },
+    imageStyle: { opacity },
+  } : {};
+
   return (
-    <View style={dynamicStyles.container}>
+    <Container style={dynamicStyles.container} {...imageProps}>
       <View style={dynamicStyles.topBar}>
         <TouchableOpacity style={[dynamicStyles.newButton, { backgroundColor: theme.primary }]} onPress={handleNewTask} activeOpacity={0.7}>
           <ThemedText style={dynamicStyles.newButtonText}>+ 新建任务</ThemedText>
@@ -205,7 +213,7 @@ export default function HomeScreen({ navigation }) {
           onSave={() => { setEditorVisible(false); setEditingTask(null); }}
         />
       </ErrorBoundary>
-    </View>
+    </Container>
   );
 }
 
