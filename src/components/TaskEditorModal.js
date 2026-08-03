@@ -43,10 +43,13 @@ import {
 } from '../cycle/CycleRules';
 import ColorPicker from './ColorPicker';
 import CalendarPicker from './CalendarPicker';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { useReminder } from '../context/ReminderContext';
 
 export default function TaskEditorModal({ visible, task, onClose, onSave }) {
   const { theme } = useTheme();
   const { addTask, editTask, groups } = useTasks();
+  const { times: globalTimes } = useReminder();
 
   // 表单状态
   const [title, setTitle] = useState('');
@@ -73,6 +76,10 @@ export default function TaskEditorModal({ visible, task, onClose, onSave }) {
 
   // 日历选择器
   const [showCalendar, setShowCalendar] = useState(false);
+
+  // 提醒时间选择器
+  const [showReminderPicker, setShowReminderPicker] = useState(false);
+  const [reminderTime, setReminderTime] = useState(null);
 
   const [editingTaskId, setEditingTaskId] = useState(null);
   const styles = createStyles(theme);
@@ -119,6 +126,7 @@ export default function TaskEditorModal({ visible, task, onClose, onSave }) {
       if (rule.day_of_month) setDayOfMonth(rule.day_of_month);
       if (rule.end_date) { setHasEndDate(true); setEndDateRecurrence(rule.end_date); }
     }
+    setReminderTime(t.reminder_time || null);
   }
 
   function resetForm() {
@@ -139,6 +147,7 @@ export default function TaskEditorModal({ visible, task, onClose, onSave }) {
     setGroupId(0);
     setSteps([]);
     setStepInput('');
+    setReminderTime(null);
   }
 
   // 步骤操作
@@ -172,6 +181,16 @@ export default function TaskEditorModal({ visible, task, onClose, onSave }) {
     setStartDate(d.getTime());
   }
 
+  // 提醒时间覆盖
+  const handleReminderTimeSet = (time) => {
+    setReminderTime(time);
+    setShowReminderPicker(false);
+  };
+
+  const handleReminderTimeRemove = () => {
+    setReminderTime(null);
+  };
+
   // 构建循环规则
   function buildRecurrenceRule() {
     if (!hasRecurrence) return null;
@@ -200,10 +219,11 @@ export default function TaskEditorModal({ visible, task, onClose, onSave }) {
       deadline: null,
       recurrenceRule: buildRecurrenceRule(),
       steps: steps.map((s) => s.title),
+      reminderTime,
     };
     try {
       if (editingTaskId) {
-        await editTask(editingTaskId, { title: taskData.title, note: taskData.note, start_time: taskData.startTime, end_time: taskData.endTime, start_date: taskData.startDate, color: taskData.color, group_id: groupId });
+        await editTask(editingTaskId, { title: taskData.title, note: taskData.note, start_time: taskData.startTime, end_time: taskData.endTime, start_date: taskData.startDate, color: taskData.color, group_id: groupId, reminder_time: reminderTime });
       } else {
         await addTask(taskData);
       }
@@ -351,6 +371,26 @@ export default function TaskEditorModal({ visible, task, onClose, onSave }) {
                 )}
               </View>
             )}
+
+            {/* 提醒时间覆盖 */}
+            <View style={styles.fieldGroup}>
+              <Text style={[styles.sectionLabel, { color: theme.textTertiary }]}>提醒时间</Text>
+              <TouchableOpacity
+                style={[styles.reminderRow, { backgroundColor: theme.cardBackground, borderColor: theme.separator }]}
+                onPress={() => setShowReminderPicker(true)}
+              >
+                <Text style={[styles.reminderText, { color: theme.textPrimary }]}>
+                  {reminderTime
+                    ? `自定义: ${reminderTime}`
+                    : `跟随全局 (${globalTimes.length > 0 ? globalTimes.join(', ') : '未设置'})`}
+                </Text>
+                {reminderTime && (
+                  <TouchableOpacity onPress={handleReminderTimeRemove}>
+                    <Text style={{ color: theme.danger }}>移除覆盖</Text>
+                  </TouchableOpacity>
+                )}
+              </TouchableOpacity>
+            </View>
           </ScrollView>
 
           <TouchableOpacity style={[styles.saveButton, { backgroundColor: theme.primary }]} onPress={handleSave} activeOpacity={0.8}>
@@ -366,6 +406,23 @@ export default function TaskEditorModal({ visible, task, onClose, onSave }) {
         onSelect={(timestamp) => { setStartDate(timestamp); }}
         onClose={() => setShowCalendar(false)}
       />
+
+      {/* 提醒时间选择器 */}
+      {showReminderPicker && (
+        <DateTimePicker
+          value={new Date()}
+          mode="time"
+          is24Hour={true}
+          display="spinner"
+          onChange={(event, selectedDate) => {
+            setShowReminderPicker(false);
+            if (event.type === 'dismissed' || !selectedDate) return;
+            const hours = String(selectedDate.getHours()).padStart(2, '0');
+            const minutes = String(selectedDate.getMinutes()).padStart(2, '0');
+            handleReminderTimeSet(`${hours}:${minutes}`);
+          }}
+        />
+      )}
     </Modal>
   );
 }
@@ -423,5 +480,18 @@ function createStyles(theme) {
     datePickerRow: { flexDirection: 'row', gap: 10, marginBottom: 10 },
     datePickerBtn: { flex: 1, paddingVertical: 12, borderRadius: 8, alignItems: 'center' },
     datePickerCancel: { borderWidth: 1, borderRadius: 8, paddingVertical: 12, alignItems: 'center', marginTop: 4 },
+    // 提醒时间
+    reminderRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 14,
+      paddingVertical: 14,
+      borderRadius: 10,
+      marginBottom: 6,
+      borderWidth: 1,
+    },
+    reminderText: { fontSize: 14, fontWeight: '500', flex: 1 },
+    sectionLabel: { fontSize: 12, fontWeight: '600', marginTop: 16, marginBottom: 8, marginLeft: 4 },
   });
 }
