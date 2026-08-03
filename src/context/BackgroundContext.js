@@ -13,8 +13,10 @@ const BackgroundContext = createContext();
 const STORAGE_DIR = `${FileSystem.documentDirectory}backgrounds/`;
 
 export function BackgroundProvider({ children }) {
-  const [imageUri, setImageUri] = useState(null);
-  const [opacity, setOpacityState] = useState(0.6);
+  const [lightImageUri, setLightImageUri] = useState(null);
+  const [darkImageUri, setDarkImageUri] = useState(null);
+  const [lightOpacity, setLightOpacityState] = useState(0.6);
+  const [darkOpacity, setDarkOpacityState] = useState(0.6);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -31,10 +33,14 @@ export function BackgroundProvider({ children }) {
       );
       const rows = result[0].rows;
       rows.forEach((row) => {
-        if (row.key === 'background_image_uri' && row.value) {
-          setImageUri(row.value);
-        } else if (row.key === 'background_opacity') {
-          setOpacityState(parseFloat(row.value) || 0.6);
+        if (row.key === 'bg_light_image_uri' && row.value) {
+          setLightImageUri(row.value);
+        } else if (row.key === 'bg_dark_image_uri' && row.value) {
+          setDarkImageUri(row.value);
+        } else if (row.key === 'bg_light_opacity') {
+          setLightOpacityState(parseFloat(row.value) || 0.6);
+        } else if (row.key === 'bg_dark_opacity') {
+          setDarkOpacityState(parseFloat(row.value) || 0.6);
         }
       });
     } catch (e) {
@@ -57,7 +63,7 @@ export function BackgroundProvider({ children }) {
     }
   }
 
-  const selectImage = useCallback(async () => {
+  const selectImage = useCallback(async (mode = 'light') => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
       Alert.alert('需要权限', '请允许访问相册以选择背景图片');
@@ -89,38 +95,61 @@ export function BackgroundProvider({ children }) {
     const destUri = `${STORAGE_DIR}${fileName}`;
     await FileSystem.copyAsync({ from: compressed.uri, to: destUri });
 
-    if (imageUri && imageUri.startsWith(STORAGE_DIR)) {
-      try { await FileSystem.deleteAsync(imageUri); } catch (e) {}
+    const targetUri = mode === 'light' ? lightImageUri : darkImageUri;
+    if (targetUri && targetUri.startsWith(STORAGE_DIR)) {
+      try { await FileSystem.deleteAsync(targetUri); } catch (e) {}
     }
 
-    setImageUri(destUri);
-    await saveSetting('background_image_uri', destUri);
-  }, [imageUri]);
+    if (mode === 'light') {
+      setLightImageUri(destUri);
+      await saveSetting('bg_light_image_uri', destUri);
+    } else {
+      setDarkImageUri(destUri);
+      await saveSetting('bg_dark_image_uri', destUri);
+    }
+  }, [lightImageUri, darkImageUri]);
 
-  const setOpacity = useCallback((value) => {
-    setOpacityState(value);
-    saveSetting('background_opacity', String(value));
+  const setOpacity = useCallback((value, mode = 'light') => {
+    if (mode === 'light') {
+      setLightOpacityState(value);
+      saveSetting('bg_light_opacity', String(value));
+    } else {
+      setDarkOpacityState(value);
+      saveSetting('bg_dark_opacity', String(value));
+    }
   }, []);
 
   const removeBackground = useCallback(async () => {
-    if (imageUri && imageUri.startsWith(STORAGE_DIR)) {
-      try { await FileSystem.deleteAsync(imageUri); } catch (e) {}
+    if (lightImageUri && lightImageUri.startsWith(STORAGE_DIR)) {
+      try { await FileSystem.deleteAsync(lightImageUri); } catch (e) {}
     }
-    setImageUri(null);
-    await saveSetting('background_image_uri', '');
-  }, [imageUri]);
+    if (darkImageUri && darkImageUri.startsWith(STORAGE_DIR)) {
+      try { await FileSystem.deleteAsync(darkImageUri); } catch (e) {}
+    }
+    setLightImageUri(null);
+    setDarkImageUri(null);
+    await saveSetting('bg_light_image_uri', '');
+    await saveSetting('bg_dark_image_uri', '');
+  }, [lightImageUri, darkImageUri]);
 
-  const hasBackground = useMemo(() => imageUri !== null, [imageUri]);
+  const hasBackground = useMemo(
+    () => lightImageUri !== null || darkImageUri !== null,
+    [lightImageUri, darkImageUri]
+  );
 
   const value = useMemo(() => ({
-    imageUri,
-    opacity,
+    lightImageUri,
+    darkImageUri,
+    lightOpacity,
+    darkOpacity,
+    imageUri: lightImageUri,
+    opacity: lightOpacity,
     hasBackground,
     isLoading,
     selectImage,
     setOpacity,
     removeBackground,
-  }), [imageUri, opacity, hasBackground, isLoading, selectImage, setOpacity, removeBackground]);
+  }), [lightImageUri, darkImageUri, lightOpacity, darkOpacity, hasBackground, isLoading, selectImage, setOpacity, removeBackground]);
 
   return (
     <BackgroundContext.Provider value={value}>
