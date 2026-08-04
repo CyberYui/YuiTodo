@@ -2,53 +2,25 @@
   "expo": {
     "name": "YuiTodo",
     "slug": "yui-todo",
-    "version": "1.6.7",
+    "version": "2.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "ios": {
-      "supportsTablet": false
-    },
+    "splash": { "image": "./assets/splash.png", "resizeMode": "contain", "backgroundColor": "#ffffff" },
+    "assetBundlePatterns": ["**/*"],
+    "ios": { "supportsTablet": false },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
+      "adaptiveIcon": { "foregroundImage": "./assets/adaptive-icon.png", "backgroundColor": "#ffffff" },
       "package": "com.yuitodo.app",
-      "permissions": [
-        "android.permission.READ_MEDIA_IMAGES",
-        "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.RECORD_AUDIO"
-      ]
+      "permissions": ["android.permission.POST_NOTIFICATIONS"]
     },
     "plugins": [
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "允许 YuiTodo 访问您的相册以选择背景图片"
-        }
-      ],
-      [
-        "expo-notifications",
-        {
-          "color": "#3B82F6"
-        }
-      ]
+      "expo-font",
+      ["expo-image-picker", { "photosPermission": "允许 YuiTodo 访问您的相册" }],
+      ["expo-notifications", { "color": "#3B82F6" }],
+      ["expo-build-properties", { "android": { "newArchEnabled": true, "enableHermes": true } }]
     ],
-    "extra": {
-      "eas": {
-        "projectId": "f448d654-5c5d-4bd6-97b1-18dc2e22eaa3"
-      }
-    },
+    "extra": { "eas": { "projectId": "f448d654-5c5d-4bd6-97b1-18dc2e22eaa3" } },
     "owner": "cyberyui"
   }
 }
